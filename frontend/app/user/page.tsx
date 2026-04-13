@@ -1,0 +1,360 @@
+"use client";
+
+import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
+import { Package, Heart, MapPin, ShieldCheck, CreditCard, UserRound, ChevronRight } from "lucide-react";
+import NavBar from "@/components/NavBar";
+import Footer from "@/components/Footer";
+import { getCurrentUser, isLoggedIn } from "@/lib/auth";
+import { cartCount } from "@/lib/cart";
+import { readWishlist } from "@/lib/wishlist";
+
+type AccountTile = {
+  title: string;
+  description: string;
+  href: string;
+  cta: string;
+  icon: React.ReactNode;
+};
+
+type RecentOrder = {
+  id: string;
+  title: string;
+  status: string;
+  total: string;
+  date: string;
+};
+
+const recentOrders: RecentOrder[] = [
+  {
+    id: "ME-2084",
+    title: "Hisense main board replacement",
+    status: "Delivered",
+    total: "UGX 185,000",
+    date: "Delivered on March 18",
+  },
+  {
+    id: "ME-2067",
+    title: "Universal TV remote and HDMI cable",
+    status: "Shipped",
+    total: "UGX 52,000",
+    date: "Arriving Monday",
+  },
+  {
+    id: "ME-2051",
+    title: "Digital multimeter toolkit bundle",
+    status: "Processing",
+    total: "UGX 96,000",
+    date: "Placed yesterday",
+  },
+];
+
+export default function UserPage() {
+  const [mounted, setMounted] = useState(false);
+  const [loggedIn, setLoggedIn] = useState(false);
+  const [wishlistCount, setWishlistCount] = useState(0);
+  const [bagCount, setBagCount] = useState(0);
+  const [userName, setUserName] = useState("Customer");
+  const [phone, setPhone] = useState("");
+  const [address, setAddress] = useState("");
+
+  useEffect(() => {
+    const sync = () => {
+      const user = getCurrentUser();
+      setMounted(true);
+      setLoggedIn(isLoggedIn());
+      setWishlistCount(readWishlist().length);
+      setBagCount(cartCount());
+      setUserName(user?.fullName || "Customer");
+      setPhone(user?.phone || "");
+      setAddress([user?.address, user?.city, user?.country].filter(Boolean).join(", "));
+    };
+
+    sync();
+    window.addEventListener("auth:updated", sync);
+    window.addEventListener("cart:updated", sync);
+    window.addEventListener("wishlist:updated", sync);
+    window.addEventListener("storage", sync);
+
+    return () => {
+      window.removeEventListener("auth:updated", sync);
+      window.removeEventListener("cart:updated", sync);
+      window.removeEventListener("wishlist:updated", sync);
+      window.removeEventListener("storage", sync);
+    };
+  }, []);
+
+  const firstName = useMemo(() => userName.split(" ")[0] || "Customer", [userName]);
+  const initials = useMemo(
+    () =>
+      userName
+        .split(" ")
+        .filter(Boolean)
+        .slice(0, 2)
+        .map((part) => part[0]?.toUpperCase())
+        .join("") || "CU",
+    [userName]
+  );
+
+  const accountTiles: AccountTile[] = [
+    {
+      title: "Your Orders",
+      description: "Track packages, review recent purchases, and buy again quickly.",
+      href: "/user",
+      cta: "View orders",
+      icon: <Package className="h-6 w-6 text-[#111827]" />,
+    },
+    {
+      title: "Login & Security",
+      description: "Manage your phone number, profile details, and account preferences.",
+      href: "/profile",
+      cta: "Edit profile",
+      icon: <ShieldCheck className="h-6 w-6 text-[#111827]" />,
+    },
+    {
+      title: "Your Addresses",
+      description: address || "Add a delivery address for faster checkout and easier reorders.",
+      href: "/profile",
+      cta: "Manage addresses",
+      icon: <MapPin className="h-6 w-6 text-[#111827]" />,
+    },
+    {
+      title: "Payment Options",
+      description: "Review supported payment methods and prepare for checkout.",
+      href: "/checkout",
+      cta: "Checkout settings",
+      icon: <CreditCard className="h-6 w-6 text-[#111827]" />,
+    },
+    {
+      title: "Wishlist",
+      description: `${wishlistCount} saved item${wishlistCount === 1 ? "" : "s"} ready for later.`,
+      href: "/wishlist",
+      cta: "Open wishlist",
+      icon: <Heart className="h-6 w-6 text-[#111827]" />,
+    },
+    {
+      title: "Your Cart",
+      description: `${bagCount} item${bagCount === 1 ? "" : "s"} currently in your basket.`,
+      href: "/cart",
+      cta: "Go to cart",
+      icon: <UserRound className="h-6 w-6 text-[#111827]" />,
+    },
+  ];
+
+  return (
+    <main className="min-h-screen bg-[#eaeded]">
+      <NavBar />
+
+      <section className="border-b border-[#d5d9d9] bg-white">
+        <div className="mx-auto flex w-[98%] max-w-[1400px] items-center justify-between gap-4 px-4 py-6">
+          <div>
+            <div className="text-[12px] font-bold uppercase tracking-[0.16em] text-[#565959]">
+              Your Account
+            </div>
+            <h1 className="mt-2 text-[30px] font-normal leading-none text-[#0f1111]">
+              {mounted && loggedIn ? `Hello, ${firstName}` : "Your Account"}
+            </h1>
+            <p className="mt-3 max-w-[760px] text-[14px] leading-6 text-[#565959]">
+              Orders, recommendations, profile details, saved items, and checkout shortcuts in one place.
+            </p>
+          </div>
+
+          <div className="hidden items-center gap-3 md:flex">
+            <Link
+              href="/profile"
+              className="inline-flex h-[38px] items-center justify-center rounded-full border border-[#d5d9d9] bg-white px-5 text-[14px] text-[#0f1111] shadow-[0_1px_2px_rgba(15,17,17,0.08)] hover:bg-[#f7fafa]"
+            >
+              Edit profile
+            </Link>
+            <Link
+              href="/"
+              className="inline-flex h-[38px] items-center justify-center rounded-full border border-[#fcd200] bg-[#ffd814] px-5 text-[14px] font-medium text-[#0f1111] shadow-[inset_0_-1px_0_rgba(0,0,0,0.15)] hover:bg-[#f7ca00]"
+            >
+              Continue shopping
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      <section className="mx-auto w-[98%] max-w-[1400px] px-4 py-6">
+        <div className="grid gap-6 lg:grid-cols-[280px_minmax(0,1fr)]">
+          <aside className="rounded-[8px] border border-[#d5d9d9] bg-white p-5 shadow-[0_1px_2px_rgba(15,17,17,0.08)]">
+            <div className="flex items-center gap-4">
+              <div className="flex h-[64px] w-[64px] items-center justify-center rounded-full bg-[#232f3e] text-[20px] font-bold text-white">
+                {initials}
+              </div>
+              <div>
+                <div className="text-[20px] font-bold leading-6 text-[#0f1111]">{userName}</div>
+                <div className="mt-1 text-[13px] text-[#565959]">{phone || "Add your phone number"}</div>
+              </div>
+            </div>
+
+            <div className="mt-6 rounded-[8px] border border-[#e7e7e7] bg-[#f7fafa] p-4">
+              <div className="text-[12px] font-bold uppercase tracking-[0.14em] text-[#565959]">
+                Account snapshot
+              </div>
+              <div className="mt-4 space-y-3 text-[14px]">
+                <SnapshotRow label="Cart items" value={`${bagCount}`} />
+                <SnapshotRow label="Wishlist" value={`${wishlistCount}`} />
+                <SnapshotRow label="Primary address" value={address || "Not set"} />
+              </div>
+            </div>
+
+            <nav className="mt-6 space-y-2">
+              <AccountNavLink href="/user" label="Your account" active />
+              <AccountNavLink href="/profile" label="Login & security" />
+              <AccountNavLink href="/wishlist" label="Your wishlist" />
+              <AccountNavLink href="/cart" label="Your cart" />
+              <AccountNavLink href="/checkout" label="Checkout" />
+            </nav>
+          </aside>
+
+          <div className="space-y-6">
+            <section className="rounded-[8px] border border-[#d5d9d9] bg-white p-5 shadow-[0_1px_2px_rgba(15,17,17,0.08)]">
+              <h2 className="text-[28px] font-normal leading-none text-[#0f1111]">Your Account</h2>
+              <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                {accountTiles.map((tile) => (
+                  <Link
+                    key={tile.title}
+                    href={tile.href}
+                    className="group rounded-[8px] border border-[#d5d9d9] bg-white p-5 transition hover:border-[#c7c7c7] hover:bg-[#fcfcfc]"
+                  >
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#f7fafa]">
+                        {tile.icon}
+                      </div>
+                      <ChevronRight className="h-5 w-5 text-[#565959]" />
+                    </div>
+                    <div className="mt-4 text-[18px] font-bold leading-6 text-[#0f1111]">{tile.title}</div>
+                    <p className="mt-2 min-h-[60px] text-[14px] leading-5 text-[#565959]">
+                      {tile.description}
+                    </p>
+                    <div className="mt-4 inline-flex h-[31px] items-center justify-center rounded-full bg-[#ffd814] px-4 text-[13px] font-medium text-[#0f1111] shadow-[inset_0_-1px_0_rgba(0,0,0,0.15)] group-hover:bg-[#f7ca00]">
+                      {tile.cta}
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </section>
+
+            <section className="grid gap-6 xl:grid-cols-[minmax(0,1.2fr)_360px]">
+              <div className="rounded-[8px] border border-[#d5d9d9] bg-white p-5 shadow-[0_1px_2px_rgba(15,17,17,0.08)]">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <h2 className="text-[24px] font-normal leading-none text-[#0f1111]">Your Orders</h2>
+                    <p className="mt-2 text-[14px] text-[#565959]">
+                      Keep track of recent purchases and reorder common items faster.
+                    </p>
+                  </div>
+                  <Link href="/" className="text-[14px] font-medium text-[#007185] hover:underline">
+                    Buy again
+                  </Link>
+                </div>
+
+                <div className="mt-5 overflow-hidden rounded-[8px] border border-[#e7e7e7]">
+                  {recentOrders.map((order, index) => (
+                    <div
+                      key={order.id}
+                      className={`grid gap-3 px-4 py-4 md:grid-cols-[120px_minmax(0,1fr)_120px_140px] ${index ? "border-t border-[#e7e7e7]" : ""}`}
+                    >
+                      <div className="text-[13px] font-bold text-[#0f1111]">{order.id}</div>
+                      <div>
+                        <div className="text-[14px] font-medium text-[#0f1111]">{order.title}</div>
+                        <div className="mt-1 text-[13px] text-[#565959]">{order.date}</div>
+                      </div>
+                      <div className="text-[13px] font-medium text-[#007600]">{order.status}</div>
+                      <div className="text-[14px] font-bold text-[#0f1111]">{order.total}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-6">
+                <section className="rounded-[8px] border border-[#d5d9d9] bg-white p-5 shadow-[0_1px_2px_rgba(15,17,17,0.08)]">
+                  <h2 className="text-[24px] font-normal leading-none text-[#0f1111]">Account details</h2>
+                  <div className="mt-4 space-y-3 text-[14px]">
+                    <InfoLine label="Name" value={userName} />
+                    <InfoLine label="Phone" value={phone || "Not set"} />
+                    <InfoLine label="Address" value={address || "Add an address in profile"} />
+                  </div>
+                  <Link
+                    href="/profile"
+                    className="mt-5 inline-flex h-[31px] items-center justify-center rounded-full bg-[#ffd814] px-4 text-[13px] font-medium text-[#0f1111] shadow-[inset_0_-1px_0_rgba(0,0,0,0.15)] hover:bg-[#f7ca00]"
+                  >
+                    Update profile
+                  </Link>
+                </section>
+
+                <section className="rounded-[8px] border border-[#d5d9d9] bg-white p-5 shadow-[0_1px_2px_rgba(15,17,17,0.08)]">
+                  <h2 className="text-[24px] font-normal leading-none text-[#0f1111]">Buying shortcuts</h2>
+                  <div className="mt-4 space-y-3">
+                    <ShortcutLink href="/wishlist" label="Open your wishlist" />
+                    <ShortcutLink href="/cart" label="Review cart before checkout" />
+                    <ShortcutLink href="/checkout" label="Go to checkout" />
+                    <ShortcutLink href="/" label="Shop latest products" />
+                  </div>
+                </section>
+              </div>
+            </section>
+          </div>
+        </div>
+      </section>
+
+      <Footer />
+    </main>
+  );
+}
+
+function SnapshotRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-center justify-between gap-3">
+      <span className="text-[#565959]">{label}</span>
+      <span className="max-w-[1500px] text-right font-medium text-[#0f1111]">{value}</span>
+    </div>
+  );
+}
+
+function AccountNavLink({
+  href,
+  label,
+  active = false,
+}: {
+  href: string;
+  label: string;
+  active?: boolean;
+}) {
+  return (
+    <Link
+      href={href}
+      className={`flex items-center justify-between rounded-[8px] px-4 py-3 text-[14px] transition ${
+        active
+          ? "border border-[#d5d9d9] bg-[#f7fafa] font-medium text-[#0f1111]"
+          : "text-[#0f1111] hover:bg-[#f7fafa]"
+      }`}
+    >
+      <span>{label}</span>
+      <ChevronRight className="h-4 w-4 text-[#565959]" />
+    </Link>
+  );
+}
+
+function InfoLine({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-[8px] border border-[#e7e7e7] bg-[#f7fafa] px-4 py-3">
+      <div className="text-[12px] font-bold uppercase tracking-[0.12em] text-[#565959]">{label}</div>
+      <div className="mt-1 text-[14px] text-[#0f1111]">{value}</div>
+    </div>
+  );
+}
+
+function ShortcutLink({ href, label }: { href: string; label: string }) {
+  return (
+    <Link
+      href={href}
+      className="flex items-center justify-between rounded-[8px] border border-[#e7e7e7] px-4 py-3 text-[14px] text-[#0f1111] transition hover:bg-[#f7fafa]"
+    >
+      <span>{label}</span>
+      <ChevronRight className="h-4 w-4 text-[#565959]" />
+    </Link>
+  );
+}

@@ -1,0 +1,198 @@
+@import "tailwindcss";
+@import "quill/dist/quill.snow.css";
+
+@font-face {
+  font-family: "Amazon Ember";
+  src: url("/fonts/AmazonEmber_Rg.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Amazon Ember";
+  src: url("/fonts/Amazon-Ember-Medium.ttf") format("truetype");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Amazon Ember";
+  src: url("/fonts/AmazonEmber_Bd.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Amazon Ember Display";
+  src: url("/fonts/AmazonEmberDisplay_Rg.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Amazon Ember Display";
+  src: url("/fonts/AmazonEmberDisplay_Bd.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+  --font-amazon-ember: "Amazon Ember", Arial, Helvetica, sans-serif;
+  --font-amazon-ember-display: "Amazon Ember Display", "Amazon Ember", Arial, Helvetica, sans-serif;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-amazon-ember);
+  --font-mono: "Courier New", Courier, monospace;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-amazon-ember);
+}
+
+.font-display {
+  font-family: var(--font-amazon-ember-display);
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #e5e7eb;
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #d1d5db;
+}
+
+@keyframes latest-product-enter {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.latest-product-enter {
+  animation: latest-product-enter 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.tinymce-content h1,
+.tinymce-content h2,
+.tinymce-content h3,
+.tinymce-content h4,
+.ql-editor h1,
+.ql-editor h2,
+.ql-editor h3,
+.ql-editor h4 {
+  color: #111827;
+  font-family: var(--font-amazon-ember-display);
+  margin: 0 0 0.75rem;
+}
+
+.tinymce-content h1,
+.ql-editor h1 {
+  font-size: 2rem;
+}
+
+.tinymce-content h2,
+.ql-editor h2 {
+  font-size: 1.5rem;
+}
+
+.tinymce-content h3,
+.ql-editor h3 {
+  font-size: 1.25rem;
+}
+
+.tinymce-content p,
+.tinymce-content ul,
+.tinymce-content ol,
+.tinymce-content table,
+.tinymce-content blockquote,
+.ql-editor p,
+.ql-editor ul,
+.ql-editor ol,
+.ql-editor blockquote {
+  margin: 0 0 1rem;
+}
+
+.tinymce-content ul,
+.tinymce-content ol,
+.ql-editor ul,
+.ql-editor ol {
+  padding-left: 1.5rem;
+}
+
+.tinymce-content a {
+  color: #0b63ce;
+  text-decoration: underline;
+}
+
+.tinymce-content blockquote {
+  border-left: 4px solid #d1d5db;
+  padding-left: 1rem;
+  color: #4b5563;
+}
+
+.ql-toolbar.ql-snow {
+  border: 0 !important;
+  border-bottom: 1px solid #e5e7eb !important;
+  padding: 12px !important;
+}
+
+.ql-container.ql-snow {
+  border: 0 !important;
+  font-family: var(--font-amazon-ember) !important;
+}
+
+.ql-editor {
+  min-height: 280px;
+  font-size: 14px;
+  line-height: 1.7;
+  color: #374151;
+}
+
+.ql-editor.ql-blank::before {
+  color: #9ca3af !important;
+  font-style: normal !important;
+}
+
+.tinymce-content img,
+.tinymce-content video,
+.tinymce-content iframe {
+  max-width: 100%;
+  border-radius: 0.75rem;
+}
+
+.tinymce-content table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.tinymce-content th,
+.tinymce-content td {
+  border: 1px solid #e5e7eb;
+  padding: 0.75rem;
+  text-align: left;
+}

@@ -1,0 +1,20 @@
+﻿--- CATEGORY TABLE ---
+Found 1 categories in Category model.
+First 3 categories: [
+  {
+    "id": "0fe3adca-29ec-454e-bdc5-b7313814f194",
+    "parentId": null,
+    "name": "Computers & IT",
+    "slug": "computers-it",
+    "description": null,
+    "imageUrl": null,
+    "isActive": true,
+    "featuredOnHome": false,
+    "featuredSortOrder": 0,
+    "createdAt": "2026-03-21T10:01:52.981Z",
+    "updatedAt": "2026-03-21T10:01:52.981Z"
+  }
+]
+
+--- SITESETTINGS (frontend_data) ---
+Found 0 categories in SiteSettings JSON.

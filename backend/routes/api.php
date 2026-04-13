@@ -1,0 +1,76 @@
+<?php
+
+use App\Http\Controllers\AdminCategoryController;
+use App\Http\Controllers\AdminProductController;
+use App\Http\Controllers\AdminUploadController;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CloudinaryController;
+use App\Http\Controllers\FrontendDataController;
+use App\Http\Controllers\MediaController;
+use App\Http\Controllers\ProductController;
+use Illuminate\Support\Facades\Route;
+
+/*
+|--------------------------------------------------------------------------
+| Public routes (no auth required)
+|--------------------------------------------------------------------------
+*/
+
+// Storefront data (navbar, hero, categories, settings …)
+Route::get('/frontend-data', [FrontendDataController::class, 'show']);
+
+// Auth
+Route::prefix('auth')->group(function () {
+    Route::post('/register',    [AuthController::class, 'register']);
+    Route::post('/login',       [AuthController::class, 'login']);
+    Route::post('/send-otp',    [AuthController::class, 'sendOtp']);
+    Route::post('/verify-otp',  [AuthController::class, 'verifyOtp']);
+    Route::post('/logout',      [AuthController::class, 'logout'])->middleware('auth:sanctum');
+    Route::get('/me',           [AuthController::class, 'me'])->middleware('auth:sanctum');
+    Route::patch('/me',         [AuthController::class, 'updateMe'])->middleware('auth:sanctum');
+});
+
+// Public products
+Route::prefix('products')->group(function () {
+    Route::get('/latest',        [ProductController::class, 'latest']);
+    Route::get('/featured',      [ProductController::class, 'featured']);
+    Route::get('/offer-targets', [ProductController::class, 'offerTargets']);
+    Route::get('/{slug}',        [ProductController::class, 'show']);
+    Route::get('/{slug}/related',[ProductController::class, 'related']);
+});
+
+// Public category products
+Route::get('/categories/{slug}/products', [ProductController::class, 'byCategory']);
+Route::get('/media/{path}', [MediaController::class, 'show'])->where('path', '.*');
+
+/*
+|--------------------------------------------------------------------------
+| Admin routes (require Sanctum token with admin/staff role)
+|--------------------------------------------------------------------------
+*/
+Route::prefix('admin')->middleware(['auth:sanctum', 'admin'])->group(function () {
+
+    // Frontend data write
+    Route::put('/frontend-data', [FrontendDataController::class, 'update']);
+
+    // Categories
+    Route::get('/categories',         [AdminCategoryController::class, 'index']);
+    Route::post('/categories',        [AdminCategoryController::class, 'store']);
+    Route::patch('/categories/{id}',  [AdminCategoryController::class, 'update']);
+    Route::delete('/categories/{id}', [AdminCategoryController::class, 'destroy']);
+
+    // Products
+    Route::get('/products/export',    [AdminProductController::class, 'export']);
+    Route::post('/products/import',   [AdminProductController::class, 'import']);
+    Route::get('/products',           [AdminProductController::class, 'index']);
+    Route::post('/products',          [AdminProductController::class, 'store']);
+    Route::get('/products/{id}',      [AdminProductController::class, 'show']);
+    Route::patch('/products/{id}',    [AdminProductController::class, 'update']);
+    Route::delete('/products/{id}',   [AdminProductController::class, 'destroy']);
+
+    // File upload (stores to public storage disk)
+    Route::post('/upload', [AdminUploadController::class, 'store']);
+
+    // Cloudinary signed upload (when Cloudinary is configured)
+    Route::get('/cloudinary-signature', [CloudinaryController::class, 'signature']);
+});
