@@ -57,7 +57,7 @@ export default function RegisterPageClient() {
         return;
       }
 
-      const result = signUpWithPhone(fullName, phone, email);
+      const result = await signUpWithPhone(fullName, phone, email);
       if (!result.ok) {
         setError(result.error);
         return;

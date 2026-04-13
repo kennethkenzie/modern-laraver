@@ -44,7 +44,7 @@ export default function ImportPage() {
 
             if (!res.ok) throw new Error("Bulk processing failed");
             
-            const resultData = await res.json();
+            const resultData: ImportResult = await res.json();
             setResult(resultData);
         } catch (error: any) {
             console.error(error);

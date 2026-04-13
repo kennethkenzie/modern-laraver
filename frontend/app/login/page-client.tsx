@@ -56,7 +56,7 @@ export default function LoginPageClient() {
         return;
       }
 
-      const result = signInWithPhoneOrEmail(phone, email);
+      const result = await signInWithPhoneOrEmail(phone, email);
       if (!result.ok) {
         setError(result.error);
         return;

@@ -7,7 +7,7 @@ type AdminProductDetail = {
   isPublished: boolean; isFeaturedHome: boolean; createdAt: string;
   shortDescription?: string; description?: string;
   category?: { name: string };
-  media: { id: string; url: string; kind: string; alt_text?: string }[];
+  media: { id: string; url: string; kind: string; alt_text?: string; altText?: string }[];
   variants: { id: string; optionValue: string; sku?: string; price: string; stockQty: number }[];
   specs: { id: string; specName: string; specValue: string }[];
   bullets: { id: string; bulletText: string }[];

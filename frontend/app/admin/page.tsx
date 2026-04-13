@@ -74,13 +74,19 @@ function formatUGX(value: number) {
   return `UGX ${value.toLocaleString("en-US")}`;
 }
 
-function formatDashboardDate(date: Date) {
+function formatDashboardDate(date: Date | string) {
+  const normalizedDate = date instanceof Date ? date : new Date(date);
+
+  if (Number.isNaN(normalizedDate.getTime())) {
+    return "Unknown date";
+  }
+
   return new Intl.DateTimeFormat("en-US", {
     month: "short",
     day: "numeric",
     hour: "numeric",
     minute: "2-digit",
-  }).format(date);
+  }).format(normalizedDate);
 }
 
 function StatBadge({

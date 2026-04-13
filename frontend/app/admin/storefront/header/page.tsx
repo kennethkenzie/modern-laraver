@@ -25,6 +25,10 @@ type HeaderSectionProps = {
   defaultOpen?: boolean;
 };
 
+type UploadResponse = {
+  url?: string;
+};
+
 const topLinkIcons: NavTopLink["icon"][] = ["home", "info", "mail"];
 
 function HeaderSection({
@@ -207,7 +211,7 @@ export default function HeaderSettingsPage() {
 
       if (!response.ok) throw new Error("Upload failed");
 
-      const result = await response.json();
+      const result: UploadResponse = await response.json();
       if (result.url) {
         updateNavbarMeta({ logoUrl: result.url });
       }
@@ -236,7 +240,7 @@ export default function HeaderSettingsPage() {
 
       if (!response.ok) throw new Error("Upload failed");
 
-      const result = await response.json();
+      const result: UploadResponse = await response.json();
       if (result.url) {
         updateNavbarMeta({ faviconUrl: result.url });
       }

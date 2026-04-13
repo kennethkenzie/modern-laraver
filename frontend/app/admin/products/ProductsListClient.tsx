@@ -23,7 +23,7 @@ type ProductRow = {
   image: string;
   isPublished: boolean;
   isFeatured: boolean;
-  createdAt: Date;
+  createdAt: string;
 };
 
 const PAGE_SIZE = 12;

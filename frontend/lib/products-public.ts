@@ -81,6 +81,17 @@ export type PublicOfferTargetProduct = {
   href: string;
 };
 
+export type CategoryListingProduct = {
+  id: string;
+  name: string;
+  image: string;
+  href: string;
+  shortDesc: string;
+  price: number;
+  rating?: number;
+  oldPrice?: number;
+};
+
 // ─── functions ────────────────────────────────────────────────
 
 export async function getPublicProductBySlug(
@@ -160,7 +171,7 @@ export async function getProductsByCategorySlug(slug: string) {
       description: string;
       image: string;
       rootCategory: string;
-      products: unknown[];
+      products: CategoryListingProduct[];
     }>(`/categories/${encodeURIComponent(slug)}/products`);
     return data;
   } catch {
@@ -203,7 +214,7 @@ export async function getFrequentlyViewedProducts(
 export async function getApplianceCategoryFeature(): Promise<{
   title: string;
   slug: string;
-  products: { id: string; name: string; image: string; href: string; price: number }[];
+  products: { id: string; name: string; image: string; href: string; price: number; isFeatured?: boolean }[];
 } | null> {
   return null;
 }
@@ -211,7 +222,7 @@ export async function getApplianceCategoryFeature(): Promise<{
 export async function getSparePartsCategoryFeature(): Promise<{
   title: string;
   slug: string;
-  products: { id: string; name: string; image: string; href: string; price: number }[];
+  products: { id: string; name: string; image: string; href: string; price: number; isFeatured?: boolean }[];
 } | null> {
   return null;
 }

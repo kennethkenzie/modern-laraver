@@ -153,9 +153,9 @@ export default function AuthOverlay() {
         return;
       }
 
-      const result = isRegister
+      const result = await (isRegister
         ? signUpWithPhone(fullName, phone, email)
-        : signInWithPhoneOrEmail(phone, email);
+        : signInWithPhoneOrEmail(phone, email));
 
       if (!result.ok) {
         setError(result.error);
