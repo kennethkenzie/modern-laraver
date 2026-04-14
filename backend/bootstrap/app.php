@@ -13,6 +13,7 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->prepend(\Illuminate\Http\Middleware\HandleCors::class);
+        $middleware->append(\App\Http\Middleware\PreventIframeEmbedding::class);
         $middleware->alias([
             'admin'          => \App\Http\Middleware\AdminMiddleware::class,
             'web.dashboard'  => \App\Http\Middleware\WebDashboardAuth::class,
