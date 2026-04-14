@@ -70,7 +70,7 @@ function exportApp(token) {
             this.exporting = true;
             this.error = null;
             try {
-                const res = await fetch('/api/admin/products/export', {
+                const res = await fetch('{{ url('/api/admin/products/export') }}', {
                     headers: { 'Authorization': 'Bearer ' + token },
                 });
                 if (!res.ok) throw new Error('Export request failed.');

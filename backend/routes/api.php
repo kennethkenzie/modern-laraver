@@ -1,7 +1,10 @@
 <?php
 
+use App\Http\Controllers\AdminAttributeSetController;
+use App\Http\Controllers\AdminBrandController;
 use App\Http\Controllers\AdminCategoryController;
 use App\Http\Controllers\AdminProductController;
+use App\Http\Controllers\AdminUnitController;
 use App\Http\Controllers\AdminUploadController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CloudinaryController;
@@ -67,6 +70,24 @@ Route::prefix('admin')->middleware(['auth:sanctum', 'admin'])->group(function ()
     Route::get('/products/{id}',      [AdminProductController::class, 'show']);
     Route::patch('/products/{id}',    [AdminProductController::class, 'update']);
     Route::delete('/products/{id}',   [AdminProductController::class, 'destroy']);
+
+    // Brands
+    Route::get('/brands',         [AdminBrandController::class, 'index']);
+    Route::post('/brands',        [AdminBrandController::class, 'store']);
+    Route::patch('/brands/{id}',  [AdminBrandController::class, 'update']);
+    Route::delete('/brands/{id}', [AdminBrandController::class, 'destroy']);
+
+    // Units
+    Route::get('/units',         [AdminUnitController::class, 'index']);
+    Route::post('/units',        [AdminUnitController::class, 'store']);
+    Route::patch('/units/{id}',  [AdminUnitController::class, 'update']);
+    Route::delete('/units/{id}', [AdminUnitController::class, 'destroy']);
+
+    // Attribute Sets
+    Route::get('/attribute-sets',         [AdminAttributeSetController::class, 'index']);
+    Route::post('/attribute-sets',        [AdminAttributeSetController::class, 'store']);
+    Route::patch('/attribute-sets/{id}',  [AdminAttributeSetController::class, 'update']);
+    Route::delete('/attribute-sets/{id}', [AdminAttributeSetController::class, 'destroy']);
 
     // File upload (stores to public storage disk)
     Route::post('/upload', [AdminUploadController::class, 'store']);

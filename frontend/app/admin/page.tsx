@@ -410,7 +410,7 @@ export default async function EcommerceAdminDashboard() {
     category: product.category,
     price: formatUGX(product.price),
     status: product.isPublished ? "Published" : "Draft",
-    createdAt: formatDashboardDate(product.createdAt),
+    createdAt: formatDashboardDate(new Date(product.createdAt)),
   } satisfies UploadRow));
 
   const statCards: StatCard[] = [

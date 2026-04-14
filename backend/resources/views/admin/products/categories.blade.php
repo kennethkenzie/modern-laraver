@@ -437,8 +437,8 @@ function categoriesApp(token) {
 
             try {
                 const url    = this.editingId
-                    ? `/api/admin/categories/${this.editingId}`
-                    : '/api/admin/categories';
+                    ? `${window.API_BASE}/api/admin/categories/${this.editingId}`
+                    : `${window.API_BASE}/api/admin/categories`;
                 const method = this.editingId ? 'PATCH' : 'POST';
 
                 const res = await fetch(url, {
@@ -488,7 +488,7 @@ function categoriesApp(token) {
         async deleteCategory(cat) {
             if (!confirm(`Delete "${cat.name}"? Sub-categories will be moved up.`)) return;
             try {
-                const res = await fetch(`/api/admin/categories/${cat.id}`, {
+                const res = await fetch(`${window.API_BASE}/api/admin/categories/${cat.id}`, {
                     method: 'DELETE',
                     headers: { 'Authorization': 'Bearer ' + this.token },
                 });

@@ -134,14 +134,24 @@
                             <a href="{{ route('dashboard.products.add') }}"
                                class="block rounded-lg px-3 py-2 text-[14px] transition hover:bg-white/5 hover:text-white
                                       {{ request()->routeIs('dashboard.products.add') ? 'text-white font-semibold' : 'text-gray-400' }}">Add New Product</a>
-                            <a href="#" class="block rounded-lg px-3 py-2 text-[14px] text-gray-400 transition hover:bg-white/5 hover:text-white">Brand</a>
+                            <a href="{{ route('dashboard.products.brands') }}"
+                               class="block rounded-lg px-3 py-2 text-[14px] transition hover:bg-white/5 hover:text-white
+                                      {{ request()->routeIs('dashboard.products.brands') ? 'text-white font-semibold' : 'text-gray-400' }}">Brand</a>
                             <a href="{{ route('dashboard.products.categories') }}"
                                class="block rounded-lg px-3 py-2 text-[14px] transition hover:bg-white/5 hover:text-white
                                       {{ request()->routeIs('dashboard.products.categories') ? 'text-white font-semibold' : 'text-gray-400' }}">Categories</a>
-                            <a href="#" class="block rounded-lg px-3 py-2 text-[14px] text-gray-400 transition hover:bg-white/5 hover:text-white">Units</a>
-                            <a href="#" class="block rounded-lg px-3 py-2 text-[14px] text-gray-400 transition hover:bg-white/5 hover:text-white">Attribute Sets</a>
-                            <a href="#" class="block rounded-lg px-3 py-2 text-[14px] text-gray-400 transition hover:bg-white/5 hover:text-white">Bulk Import</a>
-                            <a href="#" class="block rounded-lg px-3 py-2 text-[14px] text-gray-400 transition hover:bg-white/5 hover:text-white">Bulk Export</a>
+                            <a href="{{ route('dashboard.products.units') }}"
+                               class="block rounded-lg px-3 py-2 text-[14px] transition hover:bg-white/5 hover:text-white
+                                      {{ request()->routeIs('dashboard.products.units') ? 'text-white font-semibold' : 'text-gray-400' }}">Units</a>
+                            <a href="{{ route('dashboard.products.attribute-sets') }}"
+                               class="block rounded-lg px-3 py-2 text-[14px] transition hover:bg-white/5 hover:text-white
+                                      {{ request()->routeIs('dashboard.products.attribute-sets') ? 'text-white font-semibold' : 'text-gray-400' }}">Attribute Sets</a>
+                            <a href="{{ route('dashboard.products.import') }}"
+                               class="block rounded-lg px-3 py-2 text-[14px] transition hover:bg-white/5 hover:text-white
+                                      {{ request()->routeIs('dashboard.products.import') ? 'text-white font-semibold' : 'text-gray-400' }}">Bulk Import</a>
+                            <a href="{{ route('dashboard.products.export') }}"
+                               class="block rounded-lg px-3 py-2 text-[14px] transition hover:bg-white/5 hover:text-white
+                                      {{ request()->routeIs('dashboard.products.export') ? 'text-white font-semibold' : 'text-gray-400' }}">Bulk Export</a>
                         </div>
                     </div>
 
@@ -529,6 +539,10 @@
             };
         }
 
+        // Global base URL — used by all pages so relative /api/ paths work regardless
+        // of how the app is deployed on cPanel (subdomain, subdirectory, etc.)
+        window.API_BASE = '{{ rtrim(url('/'), '/') }}';
+
         document.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
         });
@@ -543,7 +557,7 @@
         async function uploadFile(file, token) {
             const body = new FormData();
             body.append('file', file);
-            const res = await fetch('/api/admin/upload', {
+            const res = await fetch('{{ url('/api/admin/upload') }}', {
                 method: 'POST',
                 headers: { 'Authorization': 'Bearer ' + token },
                 body,

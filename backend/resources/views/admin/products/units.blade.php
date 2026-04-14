@@ -209,7 +209,7 @@ function unitsApp(token) {
             if (!this.form.shortName.trim()) { this.error = 'Short name is required.'; return; }
             this.saving = true; this.error = null;
             try {
-                const url = this.editingId ? `/api/admin/units/${this.editingId}` : '/api/admin/units';
+                const url = this.editingId ? `${window.API_BASE}/api/admin/units/${this.editingId}` : `${window.API_BASE}/api/admin/units`;
                 const method = this.editingId ? 'PATCH' : 'POST';
                 const res = await fetch(url, {
                     method,
@@ -233,7 +233,7 @@ function unitsApp(token) {
         },
 
         async toggleActive(unit) {
-            const res = await fetch(`/api/admin/units/${unit.id}`, {
+            const res = await fetch(`${window.API_BASE}/api/admin/units/${unit.id}`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
                 body: JSON.stringify({ isActive: !unit.isActive }),
@@ -243,7 +243,7 @@ function unitsApp(token) {
 
         async deleteUnit(id) {
             if (!confirm('Delete this unit?')) return;
-            const res = await fetch(`/api/admin/units/${id}`, {
+            const res = await fetch(`${window.API_BASE}/api/admin/units/${id}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': 'Bearer ' + token },
             });

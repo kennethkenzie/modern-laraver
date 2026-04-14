@@ -214,7 +214,7 @@ const _dashToken = '{{ session('admin_token') }}';
 async function deleteProduct(id, name) {
     if (!confirm('Delete "' + name + '"? This cannot be undone.')) return;
     try {
-        const res = await fetch('/api/admin/products/' + id, {
+        const res = await fetch(window.API_BASE + '/api/admin/products/' + id, {
             method: 'DELETE',
             headers: { 'Authorization': 'Bearer ' + _dashToken },
         });

@@ -289,7 +289,7 @@ function attributeSetsApp(token) {
             if (validOpts.length === 0) { this.error = 'At least one option is required.'; return; }
             this.saving = true; this.error = null;
             try {
-                const url = this.editingId ? `/api/admin/attribute-sets/${this.editingId}` : '/api/admin/attribute-sets';
+                const url = this.editingId ? `${window.API_BASE}/api/admin/attribute-sets/${this.editingId}` : `${window.API_BASE}/api/admin/attribute-sets`;
                 const method = this.editingId ? 'PATCH' : 'POST';
                 const res = await fetch(url, {
                     method,
@@ -313,7 +313,7 @@ function attributeSetsApp(token) {
         },
 
         async toggleActive(set) {
-            const res = await fetch(`/api/admin/attribute-sets/${set.id}`, {
+            const res = await fetch(`${window.API_BASE}/api/admin/attribute-sets/${set.id}`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
                 body: JSON.stringify({ isActive: !set.isActive }),
@@ -323,7 +323,7 @@ function attributeSetsApp(token) {
 
         async deleteSet(id) {
             if (!confirm('Delete this attribute set and all its options?')) return;
-            const res = await fetch(`/api/admin/attribute-sets/${id}`, {
+            const res = await fetch(`${window.API_BASE}/api/admin/attribute-sets/${id}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': 'Bearer ' + token },
             });

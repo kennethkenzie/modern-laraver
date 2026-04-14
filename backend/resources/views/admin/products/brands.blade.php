@@ -333,7 +333,7 @@ function brandsApp(token) {
             if (!this.form.name.trim()) { this.error = 'Name is required.'; return; }
             this.saving = true; this.error = null;
             try {
-                const url = this.editingId ? `/api/admin/brands/${this.editingId}` : '/api/admin/brands';
+                const url = this.editingId ? `${window.API_BASE}/api/admin/brands/${this.editingId}` : `${window.API_BASE}/api/admin/brands`;
                 const method = this.editingId ? 'PATCH' : 'POST';
                 const res = await fetch(url, {
                     method,
@@ -357,7 +357,7 @@ function brandsApp(token) {
         },
 
         async toggleActive(brand) {
-            const res = await fetch(`/api/admin/brands/${brand.id}`, {
+            const res = await fetch(`${window.API_BASE}/api/admin/brands/${brand.id}`, {
                 method: 'PATCH',
                 headers: { 'Content-Type':'application/json', 'Authorization':'Bearer ' + token },
                 body: JSON.stringify({ isActive: !brand.isActive }),
@@ -366,7 +366,7 @@ function brandsApp(token) {
         },
 
         async toggleFeatured(brand) {
-            const res = await fetch(`/api/admin/brands/${brand.id}`, {
+            const res = await fetch(`${window.API_BASE}/api/admin/brands/${brand.id}`, {
                 method: 'PATCH',
                 headers: { 'Content-Type':'application/json', 'Authorization':'Bearer ' + token },
                 body: JSON.stringify({ isFeatured: !brand.isFeatured }),
@@ -376,7 +376,7 @@ function brandsApp(token) {
 
         async deleteBrand(id) {
             if (!confirm('Delete this brand?')) return;
-            const res = await fetch(`/api/admin/brands/${id}`, {
+            const res = await fetch(`${window.API_BASE}/api/admin/brands/${id}`, {
                 method: 'DELETE',
                 headers: { 'Authorization':'Bearer ' + token },
             });

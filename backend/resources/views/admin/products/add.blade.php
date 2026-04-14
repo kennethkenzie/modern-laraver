@@ -710,7 +710,7 @@ function addProductApp(token) {
             this.message = '';
 
             try {
-                const response = await fetch('/api/admin/products', {
+                const response = await fetch(window.API_BASE + '/api/admin/products', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

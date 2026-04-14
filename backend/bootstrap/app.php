@@ -12,6 +12,15 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // Trust all proxies so Laravel sees HTTPS when behind cPanel / load-balancers.
+        // cPanel terminates SSL at Apache and forwards as HTTP; without this Laravel
+        // generates http:// URLs on an https:// site, causing redirect loops.
+        $middleware->trustProxies(at: '*', headers: \Illuminate\Http\Request::HEADER_X_FORWARDED_FOR |
+            \Illuminate\Http\Request::HEADER_X_FORWARDED_HOST |
+            \Illuminate\Http\Request::HEADER_X_FORWARDED_PORT |
+            \Illuminate\Http\Request::HEADER_X_FORWARDED_PROTO |
+            \Illuminate\Http\Request::HEADER_X_FORWARDED_AWS_ELB);
+
         $middleware->prepend(\Illuminate\Http\Middleware\HandleCors::class);
         $middleware->append(\App\Http\Middleware\PreventIframeEmbedding::class);
         $middleware->alias([

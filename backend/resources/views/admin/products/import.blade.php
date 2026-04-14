@@ -133,7 +133,7 @@ function importApp(token) {
                 } else {
                     data = JSON.parse(text);
                 }
-                const res = await fetch('/api/admin/products/import', {
+                const res = await fetch('{{ url('/api/admin/products/import') }}', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
                     body: JSON.stringify(data),

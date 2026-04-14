@@ -7,10 +7,7 @@
 
 import { normalizePhoneNumber } from "@/lib/phone";
 
-const API =
-  (typeof window !== "undefined"
-    ? process.env.NEXT_PUBLIC_API_URL
-    : process.env.API_URL) ?? "https://admin.e-modern.ug/api";
+const AUTH_API_BASE = "/api/auth";
 
 const SESSION_KEY = "modern_session_v1";
 const TOKEN_KEY   = "admin_token";
@@ -73,7 +70,7 @@ export function isLoggedIn() {
 // ─── API helpers ─────────────────────────────────────────────
 
 async function apiPost<T>(path: string, body: unknown, token?: string): Promise<T> {
-  const res = await fetch(`${API}${path}`, {
+  const res = await fetch(`${AUTH_API_BASE}${path}`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -193,7 +190,7 @@ export async function logout() {
 
   const token = getToken();
   if (token) {
-    await fetch(`${API}/auth/logout`, {
+    await fetch(`${AUTH_API_BASE}/logout`, {
       method: "POST",
       headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },
     }).catch(() => {});
