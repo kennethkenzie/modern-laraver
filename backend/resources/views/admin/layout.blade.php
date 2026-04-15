@@ -612,9 +612,10 @@
             };
         }
 
-        // Global base URL — used by all pages so relative /api/ paths work regardless
-        // of how the app is deployed on cPanel (subdomain, subdirectory, etc.)
-        window.API_BASE = '{{ rtrim(url('/'), '/') }}';
+        // Global base URL — derived from the browser's own origin so it always
+        // matches the protocol (http vs https) and host, regardless of how the
+        // server-side APP_URL or cPanel reverse-proxy headers are configured.
+        window.API_BASE = window.location.origin;
 
         document.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
