@@ -77,10 +77,14 @@
             'siteTitle' => 'Modern Electronics',
         ];
 
-        $frontendSettings = \App\Models\SiteSettings::find('frontend_data');
-        $frontendPayload = $frontendSettings ? json_decode($frontendSettings->value, true) : [];
-        $frontendNavbar = is_array($frontendPayload['navbar'] ?? null) ? $frontendPayload['navbar'] : [];
-        $frontendBrand = array_replace($frontendBrand, $frontendNavbar);
+        try {
+            $frontendSettings = \App\Models\SiteSettings::find('frontend_data');
+            $frontendPayload = $frontendSettings ? json_decode($frontendSettings->value, true) : [];
+            $frontendNavbar = is_array($frontendPayload['navbar'] ?? null) ? $frontendPayload['navbar'] : [];
+            $frontendBrand = array_replace($frontendBrand, $frontendNavbar);
+        } catch (\Throwable $e) {
+            report($e);
+        }
     @endphp
 
     {{-- Mobile sidebar overlay --}}
