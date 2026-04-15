@@ -11,26 +11,18 @@ import {
 } from "lucide-react";
 import SafeImage from "@/components/SafeImage";
 import { useFrontendData } from "@/lib/use-frontend-data";
-import type { PublicOfferTargetProduct } from "@/lib/products-public";
-
 import type { FrontendData } from "@/lib/frontend-data";
 
 export default function HeroCarouselWithRightCards({ initialData }: { initialData?: FrontendData }) {
-  const { data, isLoading } = useFrontendData(initialData);
+  const { data } = useFrontendData(initialData);
   const slides = data.hero.slides;
   const rightCards = data.hero.sideCards;
   const featuredOffers = data.offers.filter((offer) => offer.isActive && offer.isFeatured);
   const activeOffers = data.offers.filter((offer) => offer.isActive && !offer.isFeatured);
   const heroOffers = [...featuredOffers, ...activeOffers].slice(0, 2);
-  const productOfferSlugs = heroOffers
-    .filter((offer) => offer.targetType === "product" && offer.targetValue)
-    .map((offer) => offer.targetValue);
 
   const [active, setActive] = useState(0);
   const [paused, setPaused] = useState(false);
-  const [productTargets, setProductTargets] = useState<Record<string, PublicOfferTargetProduct>>(
-    {}
-  );
 
   const total = slides.length;
   const activeIndex = total > 0 ? active % total : 0;
@@ -49,54 +41,6 @@ export default function HeroCarouselWithRightCards({ initialData }: { initialDat
     }, 5000);
     return () => clearInterval(t);
   }, [paused, total]);
-
-  useEffect(() => {
-    let activeRequest = true;
-
-    const loadProductTargets = async () => {
-      if (productOfferSlugs.length === 0) {
-        setProductTargets({});
-        return;
-      }
-
-      try {
-        const query = productOfferSlugs
-          .map((slug) => `slug=${encodeURIComponent(slug)}`)
-          .join("&");
-        const response = await fetch(`/api/products/offer-targets?${query}`, {
-          cache: "no-store",
-        });
-        if (!response.ok) {
-          throw new Error("Failed to fetch offer products.");
-        }
-
-        const payload = (await response.json()) as {
-          products?: PublicOfferTargetProduct[];
-        };
-
-        if (!activeRequest) return;
-
-        const nextTargets = (payload.products ?? []).reduce<
-          Record<string, PublicOfferTargetProduct>
-        >((acc, product) => {
-          acc[product.slug] = product;
-          return acc;
-        }, {});
-
-        setProductTargets(nextTargets);
-      } catch (error) {
-        console.error("Failed to load offer product targets.", error);
-        if (activeRequest) {
-          setProductTargets({});
-        }
-      }
-    };
-
-    void loadProductTargets();
-    return () => {
-      activeRequest = false;
-    };
-  }, [productOfferSlugs.join("|")]);
 
   if (!slides.length && !rightCards.length && !heroOffers.length) {
     return null;
@@ -219,117 +163,112 @@ export default function HeroCarouselWithRightCards({ initialData }: { initialDat
 
           <div className="col-span-12 flex flex-col gap-6 lg:col-span-4">
             {heroOffers.length > 0
-              ? heroOffers.map((offer, index) => (
-                  (() => {
-                    const productTarget =
-                      offer.targetType === "product"
-                        ? productTargets[offer.targetValue]
-                        : undefined;
+              ? heroOffers.map((offer, index) => {
+                  const hasTargetImage = (offer.targetType === "product" || offer.targetType === "category") && offer.targetImage;
 
-                    if (productTarget) {
-                      return (
-                        <Link
-                          key={offer.id}
-                          href={productTarget.href}
-                          className="group relative overflow-hidden rounded-none border border-[#d7dde5] bg-white shadow-[0_14px_34px_rgba(15,23,42,0.08)]"
-                        >
-                          <div className="grid min-h-[190px] grid-cols-12 gap-0 sm:min-h-[210px]">
-                            <div className="col-span-12 flex items-center justify-center bg-[linear-gradient(180deg,#f8fafc_0%,#eef3f8_100%)] p-4 sm:col-span-5">
-                              <SafeImage
-                                src={productTarget.image}
-                                alt={productTarget.title}
-                                className="h-[130px] w-full max-w-[200px] object-contain transition-transform duration-300 group-hover:scale-[1.04] sm:h-[155px]"
-                              />
+                  if (hasTargetImage) {
+                    return (
+                      <Link
+                        key={offer.id}
+                        href={getOfferHref(offer)}
+                        className="group relative overflow-hidden rounded-none border border-[#d7dde5] bg-white shadow-[0_14px_34px_rgba(15,23,42,0.08)]"
+                      >
+                        <div className="grid min-h-[190px] grid-cols-12 gap-0 sm:min-h-[210px]">
+                          <div className="col-span-12 flex items-center justify-center bg-[linear-gradient(180deg,#f8fafc_0%,#eef3f8_100%)] p-4 sm:col-span-5">
+                            <SafeImage
+                              src={offer.targetImage}
+                              alt={offer.targetTitle || offer.title}
+                              className="h-[130px] w-full max-w-[200px] object-contain transition-transform duration-300 group-hover:scale-[1.04] sm:h-[155px]"
+                            />
+                          </div>
+
+                          <div className="col-span-12 flex flex-col justify-between p-4 sm:col-span-7 sm:p-5">
+                            <div className="flex items-start justify-between gap-3">
+                              <div className="rounded-full bg-[#cc0c39] px-3 py-1 text-[11px] font-black uppercase tracking-[0.2em] text-white">
+                                {offer.badgeText || `Offer ${index + 1}`}
+                              </div>
+                              <div className="rounded-full bg-[#fff7ed] px-3 py-1 text-[12px] font-bold text-[#c2410c]">
+                                {formatOfferValue(offer)}
+                              </div>
                             </div>
 
-                            <div className="col-span-12 flex flex-col justify-between p-4 sm:col-span-7 sm:p-5">
-                              <div className="flex items-start justify-between gap-3">
-                                <div className="rounded-full bg-[#cc0c39] px-3 py-1 text-[11px] font-black uppercase tracking-[0.2em] text-white">
-                                  {offer.badgeText || `Offer ${index + 1}`}
-                                </div>
-                                <div className="rounded-full bg-[#fff7ed] px-3 py-1 text-[12px] font-bold text-[#c2410c]">
-                                  {formatOfferValue(offer)}
-                                </div>
+                            <div className="mt-4">
+                              <div className="text-[12px] font-semibold uppercase tracking-[0.2em] text-[#6b7280]">
+                                {formatOfferTarget(offer)}
                               </div>
-
-                              <div className="mt-4">
-                                <div className="text-[12px] font-semibold uppercase tracking-[0.2em] text-[#6b7280]">
-                                  Product deal
-                                </div>
-                                <div className="font-display mt-2 line-clamp-2 text-[18px] font-bold leading-tight text-[#111827] sm:text-[21px]">
-                                  {productTarget.title}
-                                </div>
-                                <p className="mt-3 line-clamp-3 text-[13px] leading-5 text-[#4b5563]">
-                                  {offer.description || productTarget.shortDescription}
-                                </p>
+                              <div className="font-display mt-2 line-clamp-2 text-[18px] font-bold leading-tight text-[#111827] sm:text-[21px]">
+                                {offer.headline || offer.targetTitle || offer.title}
                               </div>
+                              <p className="mt-3 line-clamp-3 text-[13px] leading-5 text-[#4b5563]">
+                                {offer.description || "Shop the latest deal now before it expires."}
+                              </p>
+                            </div>
 
-                              <div className="mt-5 flex items-center justify-end gap-3">
-                                <div className="font-display inline-flex w-fit items-center gap-1.5 rounded-full bg-[#ffd814] px-3 py-1.5 text-[12px] font-bold text-[#111827] shadow-sm transition group-hover:bg-[#f7ca00]">
-                                  View product
-                                  <ArrowRight size={14} className="text-[#111827]" />
-                                </div>
+                            <div className="mt-5 flex items-center justify-end gap-3">
+                              <div className="font-display inline-flex w-fit items-center gap-1.5 rounded-full bg-[#ffd814] px-3 py-1.5 text-[12px] font-bold text-[#111827] shadow-sm transition group-hover:bg-[#f7ca00]">
+                                {offer.targetType === "product" ? "View product" : "Shop now"}
+                                <ArrowRight size={14} className="text-[#111827]" />
                               </div>
                             </div>
                           </div>
+                        </div>
 
-                          <div className="absolute inset-x-0 bottom-0 h-[3px] bg-[#f6c400]" />
-                        </Link>
-                      );
-                    }
-
-                    return (
-                  <Link
-                    key={offer.id}
-                    href={getOfferHref(offer)}
-                    className="group relative overflow-hidden rounded-none border border-[#d7dde5] bg-[linear-gradient(135deg,#f8fafc_0%,#f1f5f9_100%)] shadow-[0_14px_34px_rgba(15,23,42,0.08)]"
-                  >
-                    {offer.bannerImage ? (
-                      <>
-                        <SafeImage
-                          src={offer.bannerImage}
-                          alt={offer.title}
-                          className="absolute inset-0 h-full w-full object-cover"
-                        />
-                        <div className="absolute inset-0 bg-white/10" />
-                      </>
-                    ) : null}
-                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(15,23,42,0.02),transparent_36%)]" />
-                    <div className="relative flex min-h-[190px] flex-col justify-between gap-3 p-4 sm:min-h-[210px] sm:p-5">
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="rounded-full bg-gray-100 px-3 py-1 text-[11px] font-black uppercase tracking-[0.22em] text-gray-500 backdrop-blur-sm">
-                          {offer.badgeText || `Offer ${index + 1}`}
-                        </div>
-                        <div className="rounded-full border border-gray-200 bg-white/10 px-3 py-1 text-[12px] font-bold text-gray-700 backdrop-blur-sm">
-                          {formatOfferValue(offer)}
-                        </div>
-                      </div>
- 
-                      <div>
-                        <div className="text-[12px] font-semibold uppercase tracking-[0.2em] text-[#114f8f]">
-                          {formatOfferTarget(offer)}
-                        </div>
-                        <div className="font-display mt-3 line-clamp-2 text-[20px] font-bold leading-tight text-gray-900 sm:text-[23px]">
-                          {offer.headline || offer.title}
-                        </div>
-                        <p className="mt-3 line-clamp-3 max-w-[420px] text-[13px] leading-5 text-gray-600">
-                          {offer.description || "Shop the latest deal now before it expires."}
-                        </p>
-                      </div>
-
-                      <div className="flex items-center justify-end gap-3">
-                        <div className="font-display inline-flex w-fit items-center gap-1.5 rounded-full bg-[#ffd814] px-3 py-1.5 text-[12px] font-bold text-[#111827] shadow-sm transition group-hover:bg-[#f7ca00]">
-                          Shop offer
-                          <ArrowRight size={14} className="text-[#111827]" />
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="absolute inset-x-0 bottom-0 h-[3px] bg-[#f6c400]" />
-                  </Link>
+                        <div className="absolute inset-x-0 bottom-0 h-[3px] bg-[#f6c400]" />
+                      </Link>
                     );
-                  })()
-                ))
+                  }
+
+                  return (
+                    <Link
+                      key={offer.id}
+                      href={getOfferHref(offer)}
+                      className="group relative overflow-hidden rounded-none border border-[#d7dde5] bg-[linear-gradient(135deg,#f8fafc_0%,#f1f5f9_100%)] shadow-[0_14px_34px_rgba(15,23,42,0.08)]"
+                    >
+                      {offer.bannerImage ? (
+                        <>
+                          <SafeImage
+                            src={offer.bannerImage}
+                            alt={offer.title}
+                            className="absolute inset-0 h-full w-full object-cover"
+                          />
+                          <div className="absolute inset-0 bg-white/10" />
+                        </>
+                      ) : null}
+                      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(15,23,42,0.02),transparent_36%)]" />
+                      <div className="relative flex min-h-[190px] flex-col justify-between gap-3 p-4 sm:min-h-[210px] sm:p-5">
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="rounded-full bg-gray-100 px-3 py-1 text-[11px] font-black uppercase tracking-[0.22em] text-gray-500 backdrop-blur-sm">
+                            {offer.badgeText || `Offer ${index + 1}`}
+                          </div>
+                          <div className="rounded-full border border-gray-200 bg-white/10 px-3 py-1 text-[12px] font-bold text-gray-700 backdrop-blur-sm">
+                            {formatOfferValue(offer)}
+                          </div>
+                        </div>
+
+                        <div>
+                          <div className="text-[12px] font-semibold uppercase tracking-[0.2em] text-[#114f8f]">
+                            {formatOfferTarget(offer)}
+                          </div>
+                          <div className="font-display mt-3 line-clamp-2 text-[20px] font-bold leading-tight text-gray-900 sm:text-[23px]">
+                            {offer.headline || offer.title}
+                          </div>
+                          <p className="mt-3 line-clamp-3 max-w-[420px] text-[13px] leading-5 text-gray-600">
+                            {offer.description || "Shop the latest deal now before it expires."}
+                          </p>
+                        </div>
+
+                        <div className="flex items-center justify-end gap-3">
+                          <div className="font-display inline-flex w-fit items-center gap-1.5 rounded-full bg-[#ffd814] px-3 py-1.5 text-[12px] font-bold text-[#111827] shadow-sm transition group-hover:bg-[#f7ca00]">
+                            Shop offer
+                            <ArrowRight size={14} className="text-[#111827]" />
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="absolute inset-x-0 bottom-0 h-[3px] bg-[#f6c400]" />
+                    </Link>
+                  );
+                })
               : rightCards.map((c) => (
                   <Link
                     key={c.id}

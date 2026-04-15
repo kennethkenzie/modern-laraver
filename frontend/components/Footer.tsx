@@ -15,9 +15,9 @@ import { useFrontendData } from "@/lib/use-frontend-data";
 import SafeImage from "@/components/SafeImage";
 
 const helpLinks = [
-  "Chat with us",
-  "Help Center",
-  "Contact us",
+  { label: "Chat with us", href: "#" },
+  { label: "Help Center", href: "#" },
+  { label: "Contact us", href: "/contact" },
 ];
 
 const usefulLinks = [
@@ -30,17 +30,17 @@ const usefulLinks = [
 ];
 
 const aboutLinks = [
-  "About Modern Electronics",
-  "Our Stores",
-  "Careers",
-  "Warranty Policy",
-  "Terms and Conditions",
-  "Store Credit Terms & Conditions",
-  "Dispute Resolution Policy",
-  "Privacy Policy",
-  "Cookie Notice",
-  "Return & Refund Policy",
-  "Deals & Flash Sales",
+  { label: "About Modern Electronics", href: "/about" },
+  { label: "Our Stores", href: "/contact" },
+  { label: "Careers", href: "#" },
+  { label: "Warranty Policy", href: "#" },
+  { label: "Terms and Conditions", href: "#" },
+  { label: "Store Credit Terms & Conditions", href: "#" },
+  { label: "Dispute Resolution Policy", href: "#" },
+  { label: "Privacy Policy", href: "#" },
+  { label: "Cookie Notice", href: "#" },
+  { label: "Return & Refund Policy", href: "#" },
+  { label: "Deals & Flash Sales", href: "#" },
 ];
 
 const businessLinks = [
@@ -79,8 +79,8 @@ export default function ModernElectronicsFooter() {
           <div className="flex flex-col gap-8 sm:flex-row lg:gap-12">
             <FooterBlock title="Need Help?">
               {helpLinks.map((item) => (
-                <FooterLink key={item} href="#">
-                  {item}
+                <FooterLink key={item.label} href={item.href}>
+                  {item.label}
                 </FooterLink>
               ))}
             </FooterBlock>
@@ -96,8 +96,8 @@ export default function ModernElectronicsFooter() {
 
           <FooterBlock title="About Modern Electronics">
             {aboutLinks.map((item) => (
-              <FooterLink key={item} href="#">
-                {item}
+              <FooterLink key={item.label} href={item.href}>
+                {item.label}
               </FooterLink>
             ))}
           </FooterBlock>

@@ -204,6 +204,8 @@ export type Offer = {
   endDate: string;
   targetType: "storewide" | "category" | "product" | "pickup" | "banner";
   targetValue: string;
+  targetImage: string;
+  targetTitle: string;
   badgeText: string;
   bannerImage: string;
   isActive: boolean;

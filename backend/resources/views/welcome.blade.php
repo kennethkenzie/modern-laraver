@@ -1,481 +1,387 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="h-full">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Modern Electronics - Admin Access</title>
-    <style>
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-        body {
-            min-height: 100vh;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif;
-            background:
-                radial-gradient(circle at top left, rgba(249,115,22,.20), transparent 32%),
-                radial-gradient(circle at bottom right, rgba(17,79,143,.30), transparent 38%),
-                #09111f;
-            color: #e5eef8;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 24px;
-        }
-        .shell {
-            width: 100%;
-            max-width: 1120px;
-            display: grid;
-            grid-template-columns: 1.05fr .95fr;
-            overflow: hidden;
-            border: 1px solid rgba(148,163,184,.18);
-            border-radius: 28px;
-            background: rgba(7, 15, 29, .92);
-            box-shadow: 0 28px 80px rgba(0,0,0,.42);
-            backdrop-filter: blur(18px);
-        }
-        .panel {
-            padding: 52px 48px;
-            position: relative;
-        }
-        .hero {
-            background:
-                linear-gradient(180deg, rgba(17,79,143,.16), rgba(7,15,29,.06)),
-                linear-gradient(135deg, rgba(255,255,255,.02), rgba(255,255,255,.00));
-            border-right: 1px solid rgba(148,163,184,.14);
-        }
-        .eyebrow {
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            padding: 10px 14px;
-            border-radius: 999px;
-            background: rgba(246,196,0,.12);
-            color: #fcd34d;
-            font-size: 11px;
-            font-weight: 800;
-            letter-spacing: .24em;
-            text-transform: uppercase;
-        }
-        .hero h1 {
-            margin-top: 26px;
-            font-size: 52px;
-            line-height: .96;
-            font-weight: 900;
-            letter-spacing: -.05em;
-            text-transform: uppercase;
-            color: #f8fafc;
-        }
-        .hero p {
-            margin-top: 22px;
-            max-width: 460px;
-            color: #94a3b8;
-            font-size: 15px;
-            line-height: 1.8;
-        }
-        .stack {
-            margin-top: 34px;
-            display: grid;
-            gap: 14px;
-        }
-        .stack-card {
-            border: 1px solid rgba(148,163,184,.12);
-            background: rgba(15,23,42,.76);
-            border-radius: 20px;
-            padding: 18px 18px 16px;
-        }
-        .stack-card .label {
-            font-size: 11px;
-            color: #60a5fa;
-            font-weight: 800;
-            letter-spacing: .18em;
-            text-transform: uppercase;
-        }
-        .stack-card .value {
-            margin-top: 10px;
-            color: #f8fafc;
-            font-size: 18px;
-            font-weight: 800;
-            line-height: 1.4;
-        }
-        .stack-card .note {
-            margin-top: 8px;
-            color: #94a3b8;
-            font-size: 13px;
-            line-height: 1.6;
-        }
-        .auth {
-            background: linear-gradient(180deg, rgba(15,23,42,.92), rgba(2,6,23,.96));
-        }
-        .brand {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-        }
-        .brand-mark {
-            width: 48px;
-            height: 48px;
-            border-radius: 14px;
-            background: linear-gradient(135deg, #f6c400, #f97316);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #111827;
-            font-weight: 900;
-        }
-        .brand-copy strong {
-            display: block;
-            color: #f8fafc;
-            font-size: 17px;
-            font-weight: 900;
-        }
-        .brand-copy span {
-            display: block;
-            margin-top: 4px;
-            color: #64748b;
-            font-size: 11px;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: .2em;
-        }
-        .tabs {
-            margin-top: 28px;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-            padding: 8px;
-            border-radius: 18px;
-            background: rgba(15,23,42,.92);
-            border: 1px solid rgba(148,163,184,.14);
-        }
-        .tab {
-            height: 50px;
-            border: 0;
-            border-radius: 14px;
-            background: transparent;
-            color: #94a3b8;
-            font-size: 12px;
-            font-weight: 900;
-            text-transform: uppercase;
-            letter-spacing: .16em;
-            cursor: pointer;
-        }
-        .tab.active {
-            background: #114f8f;
-            color: #fff;
-            box-shadow: 0 14px 34px rgba(17,79,143,.28);
-        }
-        .title {
-            margin-top: 28px;
-            color: #f8fafc;
-            font-size: 30px;
-            line-height: 1.02;
-            font-weight: 900;
-            letter-spacing: -.04em;
-            text-transform: uppercase;
-        }
-        .subtitle {
-            margin-top: 10px;
-            color: #94a3b8;
-            font-size: 14px;
-            line-height: 1.7;
-        }
-        .alert {
-            margin-top: 18px;
-            padding: 14px 16px;
-            border-radius: 14px;
-            font-size: 13px;
-            line-height: 1.6;
-        }
-        .alert.error {
-            border: 1px solid rgba(239,68,68,.25);
-            background: rgba(127,29,29,.28);
-            color: #fecaca;
-        }
-        .form {
-            margin-top: 26px;
-            display: none;
-        }
-        .form.active {
-            display: block;
-        }
-        .grid {
-            display: grid;
-            gap: 16px;
-        }
-        .grid.two {
-            grid-template-columns: 1fr 1fr;
-        }
-        label {
-            display: block;
-        }
-        label span {
-            display: block;
-            margin-bottom: 8px;
-            color: #94a3b8;
-            font-size: 11px;
-            font-weight: 900;
-            text-transform: uppercase;
-            letter-spacing: .16em;
-        }
-        input, select {
-            width: 100%;
-            height: 48px;
-            border-radius: 14px;
-            border: 1px solid rgba(51,65,85,.95);
-            background: #0f172a;
-            padding: 0 15px;
-            color: #f8fafc;
-            font-size: 14px;
-            font-weight: 600;
-            outline: none;
-            transition: border-color .18s, box-shadow .18s;
-        }
-        input:focus, select:focus {
-            border-color: #38bdf8;
-            box-shadow: 0 0 0 4px rgba(56,189,248,.12);
-        }
-        .password-wrap {
-            position: relative;
-        }
-        .password-wrap button {
-            position: absolute;
-            right: 14px;
-            top: 50%;
-            transform: translateY(-50%);
-            border: 0;
-            background: transparent;
-            color: #64748b;
-            cursor: pointer;
-            font-size: 12px;
-            font-weight: 900;
-            text-transform: uppercase;
-            letter-spacing: .14em;
-        }
-        .meta {
-            margin-top: 18px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 12px;
-            color: #94a3b8;
-            font-size: 13px;
-        }
-        .meta a {
-            color: #f6c400;
-            text-decoration: none;
-            font-weight: 800;
-        }
-        .submit {
-            margin-top: 20px;
-            width: 100%;
-            height: 52px;
-            border: 0;
-            border-radius: 16px;
-            background: linear-gradient(135deg, #f6c400, #f97316);
-            color: #111827;
-            font-size: 13px;
-            font-weight: 900;
-            text-transform: uppercase;
-            letter-spacing: .18em;
-            cursor: pointer;
-            transition: transform .12s, opacity .18s;
-        }
-        .submit:hover { opacity: .95; }
-        .submit:active { transform: scale(.99); }
-        .api {
-            margin-top: 26px;
-            padding-top: 20px;
-            border-top: 1px solid rgba(148,163,184,.12);
-            color: #64748b;
-            font-size: 12px;
-        }
-        .api strong {
-            color: #38bdf8;
-            font-weight: 800;
-        }
-        @media (max-width: 980px) {
-            .shell { grid-template-columns: 1fr; }
-            .hero { display: none; }
-            .panel { padding: 34px 24px; }
-            .grid.two { grid-template-columns: 1fr; }
-        }
-    </style>
-</head>
-<body data-initial-mode="{{ $errors->hasBag('register') ? 'register' : 'login' }}">
-    <div class="shell">
-        <section class="panel hero">
-            <div class="eyebrow">Admin Access Portal</div>
-            <h1>Control the storefront from one secure dashboard.</h1>
-            <p>
-                Sign in to manage products, shipping, storefront content, and operations.
-                New team members can also be created directly from this admin entry page.
-            </p>
-
-            <div class="stack">
-                <article class="stack-card">
-                    <div class="label">Dashboard URL</div>
-                    <div class="value">{{ url('/dashboard') }}</div>
-                    <div class="note">Authenticated users are redirected here immediately after sign-in or account creation.</div>
-                </article>
-                <article class="stack-card">
-                    <div class="label">Frontend Website</div>
-                    <div class="value">https://e-modern.ug/</div>
-                    <div class="note">The admin now manages storefront header, slider, product, and shipping configuration used by the live site.</div>
-                </article>
-                <article class="stack-card">
-                    <div class="label">API Base</div>
-                    <div class="value">{{ url('/api') }}</div>
-                    <div class="note">Next.js storefront and admin-facing uploads are wired through the Laravel backend.</div>
-                </article>
-            </div>
-        </section>
-
-        <section class="panel auth">
-            <div class="brand">
-                <div class="brand-mark">ME</div>
-                <div class="brand-copy">
-                    <strong>Modern Electronics</strong>
-                    <span>Admin Dashboard</span>
-                </div>
-            </div>
-
-            <div class="tabs">
-                <button type="button" class="tab" data-tab="login">Sign In</button>
-                <button type="button" class="tab" data-tab="register">Register</button>
-            </div>
-
-            <h1 class="title" id="authTitle">Welcome Back</h1>
-            <p class="subtitle" id="authSubtitle">Sign in to access the admin dashboard.</p>
-
-            @if ($errors->any() && ! $errors->hasBag('register'))
-                <div class="alert error">{{ $errors->first() }}</div>
-            @endif
-
-            @if ($errors->hasBag('register'))
-                <div class="alert error">{{ $errors->register->first() }}</div>
-            @endif
-
-            @if (session('session_expired'))
-                <div class="alert error">{{ session('session_expired') }}</div>
-            @endif
-
-            <form method="POST" action="{{ route('web.login') }}" class="form" data-form="login">
-                @csrf
-                <div class="grid">
-                    <label>
-                        <span>Email Address</span>
-                        <input type="email" name="email" value="{{ old('email') }}" placeholder="admin@e-modern.ug" autocomplete="username" required />
-                    </label>
-
-                    <label>
-                        <span>Password</span>
-                        <div class="password-wrap">
-                            <input type="password" name="password" id="login_password" placeholder="Enter your password" autocomplete="current-password" required />
-                            <button type="button" onclick="togglePassword('login_password', this)">Show</button>
-                        </div>
-                    </label>
-                </div>
-
-                <div class="meta">
-                    <span>Admin and staff accounts only.</span>
-                    <a href="#" onclick="event.preventDefault(); setMode('register')">Create account</a>
-                </div>
-
-                <button type="submit" class="submit">Sign In</button>
-            </form>
-
-            <form method="POST" action="{{ route('web.register') }}" class="form" data-form="register">
-                @csrf
-                <div class="grid">
-                    <label>
-                        <span>Full Name</span>
-                        <input type="text" name="full_name" value="{{ old('full_name') }}" placeholder="Jane Doe" required />
-                    </label>
-
-                    <div class="grid two">
-                        <label>
-                            <span>Email Address</span>
-                            <input type="email" name="email" value="{{ old('email') }}" placeholder="jane@e-modern.ug" required />
-                        </label>
-                        <label>
-                            <span>Phone</span>
-                            <input type="text" name="phone" value="{{ old('phone') }}" placeholder="+256700000000" />
-                        </label>
-                    </div>
-
-                    <label>
-                        <span>Account Role</span>
-                        <select name="role" required>
-                            <option value="admin" {{ old('role') === 'admin' ? 'selected' : '' }}>Admin</option>
-                            <option value="staff" {{ old('role') === 'staff' ? 'selected' : '' }}>Staff</option>
-                        </select>
-                    </label>
-
-                    <div class="grid two">
-                        <label>
-                            <span>Password</span>
-                            <div class="password-wrap">
-                                <input type="password" name="password" id="register_password" placeholder="Minimum 6 characters" autocomplete="new-password" required />
-                                <button type="button" onclick="togglePassword('register_password', this)">Show</button>
-                            </div>
-                        </label>
-                        <label>
-                            <span>Confirm Password</span>
-                            <div class="password-wrap">
-                                <input type="password" name="password_confirmation" id="register_password_confirmation" placeholder="Repeat password" autocomplete="new-password" required />
-                                <button type="button" onclick="togglePassword('register_password_confirmation', this)">Show</button>
-                            </div>
-                        </label>
-                    </div>
-                </div>
-
-                <div class="meta">
-                    <span>New accounts are signed in immediately after registration.</span>
-                    <a href="#" onclick="event.preventDefault(); setMode('login')">Already have an account?</a>
-                </div>
-
-                <button type="submit" class="submit">Create Account</button>
-            </form>
-
-            <div class="api">API base URL: <strong>{{ url('/api') }}</strong></div>
-        </section>
-    </div>
-
+    <title>Sign In — Modern Electronics Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <script>
-        const titles = {
-            login: {
-                title: 'Welcome Back',
-                subtitle: 'Sign in to access the admin dashboard.',
-            },
-            register: {
-                title: 'Create Admin Access',
-                subtitle: 'Register a new admin or staff account for the dashboard.',
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Amazon Ember"','Arial','Helvetica','sans-serif'],
+                        display: ['"Amazon Ember Display"','"Amazon Ember"','Arial','Helvetica','sans-serif'],
+                    },
+                },
             },
         };
-
-        function setMode(mode) {
-            document.querySelectorAll('[data-tab]').forEach((button) => {
-                button.classList.toggle('active', button.dataset.tab === mode);
-            });
-
-            document.querySelectorAll('[data-form]').forEach((form) => {
-                form.classList.toggle('active', form.dataset.form === mode);
-            });
-
-            document.getElementById('authTitle').textContent = titles[mode].title;
-            document.getElementById('authSubtitle').textContent = titles[mode].subtitle;
-        }
-
-        function togglePassword(id, button) {
-            const input = document.getElementById(id);
-            if (!input) return;
-            input.type = input.type === 'password' ? 'text' : 'password';
-            button.textContent = input.type === 'password' ? 'Show' : 'Hide';
-        }
-
-        document.querySelectorAll('[data-tab]').forEach((button) => {
-            button.addEventListener('click', () => setMode(button.dataset.tab));
-        });
-
-        setMode(document.body.dataset.initialMode || 'login');
     </script>
+    <style>
+        @font-face {
+            font-family: "Amazon Ember";
+            src: url("{{ asset('fonts/AmazonEmber_Rg.ttf') }}") format("truetype");
+            font-weight: 400; font-style: normal; font-display: swap;
+        }
+        @font-face {
+            font-family: "Amazon Ember";
+            src: url("{{ asset('fonts/Amazon-Ember-Medium.ttf') }}") format("truetype");
+            font-weight: 500; font-style: normal; font-display: swap;
+        }
+        @font-face {
+            font-family: "Amazon Ember";
+            src: url("{{ asset('fonts/AmazonEmber_Bd.ttf') }}") format("truetype");
+            font-weight: 700; font-style: normal; font-display: swap;
+        }
+        @font-face {
+            font-family: "Amazon Ember Display";
+            src: url("{{ asset('fonts/AmazonEmberDisplay_Rg.ttf') }}") format("truetype");
+            font-weight: 400; font-style: normal; font-display: swap;
+        }
+        @font-face {
+            font-family: "Amazon Ember Display";
+            src: url("{{ asset('fonts/AmazonEmberDisplay_Bd.ttf') }}") format("truetype");
+            font-weight: 700; font-style: normal; font-display: swap;
+        }
+
+        [x-cloak] { display: none !important; }
+
+        /* Keep autofill readable on white background */
+        input:-webkit-autofill {
+            -webkit-box-shadow: 0 0 0 100px #fff inset;
+            -webkit-text-fill-color: #0f1111;
+        }
+    </style>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+</head>
+
+{{-- Page bg = frontend's #eaeded on mobile; on lg the split handles its own colours --}}
+<body class="h-full bg-[#eaeded] antialiased"
+      style="font-family: 'Amazon Ember', Arial, Helvetica, sans-serif;"
+      x-data="authPage()"
+      x-init="init()"
+      data-initial-mode="{{ $errors->hasBag('register') ? 'register' : 'login' }}">
+
+<div class="min-h-screen flex items-stretch lg:items-center justify-center lg:p-8">
+
+    {{-- ── Shell: full-screen on mobile, capped card on desktop ── --}}
+    <div class="w-full lg:max-w-[1060px] lg:min-h-0 min-h-screen
+                flex flex-col lg:grid lg:grid-cols-[1.15fr_0.85fr]
+                lg:overflow-hidden lg:rounded-[24px] lg:shadow-[0_24px_80px_rgba(15,17,17,0.18)]">
+
+        {{-- ════════════════════════════════════════════════════════
+             LEFT — full-bleed image (desktop only)
+             Place your photo at public/images/login-bg.jpg
+             and swap the src to {{ asset('images/login-bg.jpg') }}
+        ════════════════════════════════════════════════════════ --}}
+        <div class="hidden lg:block relative overflow-hidden">
+            <img src="https://images.unsplash.com/photo-1550009158-9ebf69173e03?w=900&auto=format&fit=crop&q=80"
+                 alt=""
+                 class="absolute inset-0 h-full w-full object-cover object-center" />
+
+            {{-- gradient: heavier at bottom for legibility --}}
+            <div class="absolute inset-0"
+                 style="background: linear-gradient(to top,
+                            rgba(9,17,31,.90) 0%,
+                            rgba(9,17,31,.28) 52%,
+                            rgba(9,17,31,.18) 100%);"></div>
+
+            <div class="relative h-full flex flex-col justify-between p-10">
+                {{-- Brand mark --}}
+                <div class="flex items-center gap-3">
+                    <div class="h-10 w-10 rounded-xl flex items-center justify-center
+                                font-black text-[#09111f] text-sm shadow-lg"
+                         style="background: linear-gradient(135deg, #f6c400, #f97316);">ME</div>
+                    <div>
+                        <p class="font-black text-white leading-none drop-shadow">Modern Electronics</p>
+                        <p class="text-[11px] font-bold uppercase tracking-[.2em] text-white/50 mt-1">Admin Portal</p>
+                    </div>
+                </div>
+
+                {{-- Tagline at bottom --}}
+                <div>
+                    <span class="inline-flex items-center gap-2 rounded-full px-4 py-2 mb-5
+                                 text-[11px] font-black uppercase tracking-[.22em] text-white/70
+                                 border border-white/15 backdrop-blur-sm bg-white/5">
+                        <i data-lucide="shield-check" class="h-3.5 w-3.5 text-[#f6c400]"></i>
+                        Secure Access Portal
+                    </span>
+                    <h1 class="text-[42px] font-black uppercase leading-[.95] tracking-tight
+                               text-white drop-shadow-lg"
+                        style="font-family: 'Amazon Ember Display', 'Amazon Ember', Arial, sans-serif;">
+                        Control<br>the<br>storefront.
+                    </h1>
+                    <p class="mt-4 text-[14px] leading-[1.75] text-white/55 max-w-xs">
+                        Manage products, orders, shipping, and storefront content from one dashboard.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        {{-- ════════════════════════════════════════════════════════
+             RIGHT — auth panel, styled after the frontend login
+        ════════════════════════════════════════════════════════ --}}
+        <div class="flex flex-col flex-1 bg-[#eaeded] px-4 py-10 lg:px-0 lg:py-0 lg:overflow-y-auto">
+            <div class="w-full max-w-[400px] mx-auto lg:my-auto lg:py-10">
+
+                {{-- ── Brand header (mirrors frontend) ── --}}
+                <div class="mb-6 text-center">
+                    <div class="text-[26px] font-black tracking-tight text-[#0f1111]"
+                         style="font-family: 'Amazon Ember Display', 'Amazon Ember', Arial, sans-serif;">
+                        Modern Electronics
+                    </div>
+                    <p class="mt-2 text-[13px] text-[#565959]"
+                       x-text="mode === 'login'
+                           ? 'Secure sign in for admin and staff accounts.'
+                           : 'Create a new admin or staff account.'"></p>
+                </div>
+
+                {{-- ── White card (mirrors frontend card) ── --}}
+                <div class="rounded-[18px] border border-[#d5d9d9] bg-white px-6 py-6
+                            shadow-[0_8px_24px_rgba(15,17,17,0.12)]">
+
+                    {{-- Tab switcher --}}
+                    <div class="grid grid-cols-2 gap-2 mb-6">
+                        <button type="button" @click="setMode('login')"
+                                :class="mode === 'login'
+                                    ? 'border-[#fcd200] bg-[#ffd814] text-[#0f1111] shadow-[inset_0_-1px_0_rgba(0,0,0,0.15)]'
+                                    : 'border-[#d5d9d9] bg-[#f7fafa] text-[#565959] shadow-[inset_0_-1px_0_rgba(0,0,0,0.08)] hover:bg-[#eef3f3]'"
+                                class="h-10 rounded-full border text-[13px] font-medium transition-all">
+                            Sign In
+                        </button>
+                        <button type="button" @click="setMode('register')"
+                                :class="mode === 'register'
+                                    ? 'border-[#fcd200] bg-[#ffd814] text-[#0f1111] shadow-[inset_0_-1px_0_rgba(0,0,0,0.15)]'
+                                    : 'border-[#d5d9d9] bg-[#f7fafa] text-[#565959] shadow-[inset_0_-1px_0_rgba(0,0,0,0.08)] hover:bg-[#eef3f3]'"
+                                class="h-10 rounded-full border text-[13px] font-medium transition-all">
+                            Register
+                        </button>
+                    </div>
+
+                    {{-- Heading --}}
+                    <h1 class="text-[28px] font-normal leading-none text-[#0f1111]"
+                        style="font-family: 'Amazon Ember Display', 'Amazon Ember', Arial, sans-serif;"
+                        x-text="mode === 'login' ? 'Sign in' : 'Create account'"></h1>
+                    <p class="mt-3 text-[14px] leading-6 text-[#565959]"
+                       x-text="mode === 'login'
+                           ? 'Enter your email and password to access the dashboard.'
+                           : 'Set up your admin account. New accounts are signed in immediately.'"></p>
+
+                    {{-- Error / session alerts --}}
+                    @if ($errors->any() && ! $errors->hasBag('register'))
+                        <p class="mt-4 text-[13px] text-[#b12704]">{{ $errors->first() }}</p>
+                    @endif
+                    @if ($errors->hasBag('register'))
+                        <p class="mt-4 text-[13px] text-[#b12704]">{{ $errors->register->first() }}</p>
+                    @endif
+                    @if (session('session_expired'))
+                        <p class="mt-4 text-[13px] text-[#b12704]">{{ session('session_expired') }}</p>
+                    @endif
+
+                    {{-- ══ LOGIN FORM ══════════════════════════════════ --}}
+                    <form x-show="mode === 'login'" x-cloak
+                          method="POST" action="{{ route('web.login') }}"
+                          class="mt-5 space-y-4">
+                        @csrf
+
+                        {{-- Email --}}
+                        <label class="block">
+                            <span class="mb-1.5 block text-[13px] font-bold text-[#0f1111]">Email address</span>
+                            <div class="flex items-center gap-3 rounded-xl border border-[#a6a6a6] px-3 py-3
+                                        shadow-[inset_0_1px_2px_rgba(15,17,17,0.08)]
+                                        focus-within:border-[#007185] focus-within:shadow-[inset_0_1px_2px_rgba(15,17,17,0.08),0_0_0_3px_rgba(0,113,133,0.12)]
+                                        transition-shadow">
+                                <i data-lucide="mail" class="h-[18px] w-[18px] shrink-0 text-[#565959]"></i>
+                                <input type="email" name="email" value="{{ old('email') }}"
+                                       placeholder="admin@e-modern.ug" autocomplete="username" required
+                                       class="w-full bg-transparent text-[15px] text-[#0f1111]
+                                              placeholder:text-[#8a8f98] outline-none" />
+                            </div>
+                        </label>
+
+                        {{-- Password --}}
+                        <label class="block">
+                            <span class="mb-1.5 block text-[13px] font-bold text-[#0f1111]">Password</span>
+                            <div class="flex items-center gap-3 rounded-xl border border-[#a6a6a6] px-3 py-3
+                                        shadow-[inset_0_1px_2px_rgba(15,17,17,0.08)]
+                                        focus-within:border-[#007185] focus-within:shadow-[inset_0_1px_2px_rgba(15,17,17,0.08),0_0_0_3px_rgba(0,113,133,0.12)]
+                                        transition-shadow">
+                                <i data-lucide="lock" class="h-[18px] w-[18px] shrink-0 text-[#565959]"></i>
+                                <input :type="showLoginPw ? 'text' : 'password'" name="password"
+                                       placeholder="Your password" autocomplete="current-password" required
+                                       class="w-full bg-transparent text-[15px] text-[#0f1111]
+                                              placeholder:text-[#8a8f98] outline-none" />
+                                <button type="button" @click="showLoginPw = !showLoginPw"
+                                        class="text-[12px] font-bold text-[#007185] hover:underline shrink-0"
+                                        x-text="showLoginPw ? 'Hide' : 'Show'"></button>
+                            </div>
+                        </label>
+
+                        <p class="text-[12px] text-[#565959]">Admin and staff accounts only.</p>
+
+                        <button type="submit"
+                                class="flex w-full items-center justify-center gap-2 rounded-full
+                                       border border-[#fcd200] bg-[#ffd814] px-4 py-3
+                                       text-[14px] font-medium text-[#0f1111]
+                                       shadow-[inset_0_-1px_0_rgba(0,0,0,0.15)]
+                                       hover:bg-[#f7ca00] transition-colors active:scale-[.99]">
+                            Sign in
+                        </button>
+                    </form>
+
+                    {{-- ══ REGISTER FORM ═══════════════════════════════ --}}
+                    <form x-show="mode === 'register'" x-cloak
+                          method="POST" action="{{ route('web.register') }}"
+                          class="mt-5 space-y-4">
+                        @csrf
+
+                        {{-- Full name --}}
+                        <label class="block">
+                            <span class="mb-1.5 block text-[13px] font-bold text-[#0f1111]">Full name</span>
+                            <div class="flex items-center gap-3 rounded-xl border border-[#a6a6a6] px-3 py-3
+                                        shadow-[inset_0_1px_2px_rgba(15,17,17,0.08)]
+                                        focus-within:border-[#007185] focus-within:shadow-[inset_0_1px_2px_rgba(15,17,17,0.08),0_0_0_3px_rgba(0,113,133,0.12)]
+                                        transition-shadow">
+                                <i data-lucide="user" class="h-[18px] w-[18px] shrink-0 text-[#565959]"></i>
+                                <input type="text" name="full_name" value="{{ old('full_name') }}"
+                                       placeholder="Jane Doe" required
+                                       class="w-full bg-transparent text-[15px] text-[#0f1111]
+                                              placeholder:text-[#8a8f98] outline-none" />
+                            </div>
+                        </label>
+
+                        {{-- Email --}}
+                        <label class="block">
+                            <span class="mb-1.5 block text-[13px] font-bold text-[#0f1111]">Email address</span>
+                            <div class="flex items-center gap-3 rounded-xl border border-[#a6a6a6] px-3 py-3
+                                        shadow-[inset_0_1px_2px_rgba(15,17,17,0.08)]
+                                        focus-within:border-[#007185] focus-within:shadow-[inset_0_1px_2px_rgba(15,17,17,0.08),0_0_0_3px_rgba(0,113,133,0.12)]
+                                        transition-shadow">
+                                <i data-lucide="mail" class="h-[18px] w-[18px] shrink-0 text-[#565959]"></i>
+                                <input type="email" name="email" value="{{ old('email') }}"
+                                       placeholder="jane@e-modern.ug" required
+                                       class="w-full bg-transparent text-[15px] text-[#0f1111]
+                                              placeholder:text-[#8a8f98] outline-none" />
+                            </div>
+                        </label>
+
+                        {{-- Phone --}}
+                        <label class="block">
+                            <span class="mb-1.5 block text-[13px] font-bold text-[#0f1111]">Phone <span class="font-normal text-[#565959]">(optional)</span></span>
+                            <div class="flex items-center gap-3 rounded-xl border border-[#a6a6a6] px-3 py-3
+                                        shadow-[inset_0_1px_2px_rgba(15,17,17,0.08)]
+                                        focus-within:border-[#007185] focus-within:shadow-[inset_0_1px_2px_rgba(15,17,17,0.08),0_0_0_3px_rgba(0,113,133,0.12)]
+                                        transition-shadow">
+                                <i data-lucide="phone" class="h-[18px] w-[18px] shrink-0 text-[#565959]"></i>
+                                <input type="text" name="phone" value="{{ old('phone') }}"
+                                       placeholder="+256 700 000000"
+                                       class="w-full bg-transparent text-[15px] text-[#0f1111]
+                                              placeholder:text-[#8a8f98] outline-none" />
+                            </div>
+                        </label>
+
+                        {{-- Role --}}
+                        <label class="block">
+                            <span class="mb-1.5 block text-[13px] font-bold text-[#0f1111]">Account role</span>
+                            <div class="flex items-center gap-3 rounded-xl border border-[#a6a6a6] px-3 py-3
+                                        shadow-[inset_0_1px_2px_rgba(15,17,17,0.08)]
+                                        focus-within:border-[#007185] transition-shadow">
+                                <i data-lucide="badge" class="h-[18px] w-[18px] shrink-0 text-[#565959]"></i>
+                                <select name="role" required
+                                        class="w-full bg-transparent text-[15px] text-[#0f1111] outline-none appearance-none cursor-pointer">
+                                    <option value="admin" {{ old('role') === 'admin' ? 'selected' : '' }}>Admin</option>
+                                    <option value="staff" {{ old('role') === 'staff' ? 'selected' : '' }}>Staff</option>
+                                </select>
+                                <i data-lucide="chevron-down" class="h-4 w-4 shrink-0 text-[#565959] pointer-events-none"></i>
+                            </div>
+                        </label>
+
+                        {{-- Password --}}
+                        <label class="block">
+                            <span class="mb-1.5 block text-[13px] font-bold text-[#0f1111]">Password</span>
+                            <div class="flex items-center gap-3 rounded-xl border border-[#a6a6a6] px-3 py-3
+                                        shadow-[inset_0_1px_2px_rgba(15,17,17,0.08)]
+                                        focus-within:border-[#007185] focus-within:shadow-[inset_0_1px_2px_rgba(15,17,17,0.08),0_0_0_3px_rgba(0,113,133,0.12)]
+                                        transition-shadow">
+                                <i data-lucide="lock" class="h-[18px] w-[18px] shrink-0 text-[#565959]"></i>
+                                <input :type="showRegPw ? 'text' : 'password'" name="password"
+                                       placeholder="Minimum 6 characters" autocomplete="new-password" required
+                                       class="w-full bg-transparent text-[15px] text-[#0f1111]
+                                              placeholder:text-[#8a8f98] outline-none" />
+                                <button type="button" @click="showRegPw = !showRegPw"
+                                        class="text-[12px] font-bold text-[#007185] hover:underline shrink-0"
+                                        x-text="showRegPw ? 'Hide' : 'Show'"></button>
+                            </div>
+                        </label>
+
+                        {{-- Confirm password --}}
+                        <label class="block">
+                            <span class="mb-1.5 block text-[13px] font-bold text-[#0f1111]">Confirm password</span>
+                            <div class="flex items-center gap-3 rounded-xl border border-[#a6a6a6] px-3 py-3
+                                        shadow-[inset_0_1px_2px_rgba(15,17,17,0.08)]
+                                        focus-within:border-[#007185] focus-within:shadow-[inset_0_1px_2px_rgba(15,17,17,0.08),0_0_0_3px_rgba(0,113,133,0.12)]
+                                        transition-shadow">
+                                <i data-lucide="lock" class="h-[18px] w-[18px] shrink-0 text-[#565959]"></i>
+                                <input :type="showRegPwC ? 'text' : 'password'" name="password_confirmation"
+                                       placeholder="Repeat password" autocomplete="new-password" required
+                                       class="w-full bg-transparent text-[15px] text-[#0f1111]
+                                              placeholder:text-[#8a8f98] outline-none" />
+                                <button type="button" @click="showRegPwC = !showRegPwC"
+                                        class="text-[12px] font-bold text-[#007185] hover:underline shrink-0"
+                                        x-text="showRegPwC ? 'Hide' : 'Show'"></button>
+                            </div>
+                        </label>
+
+                        <button type="submit"
+                                class="flex w-full items-center justify-center gap-2 rounded-full
+                                       border border-[#fcd200] bg-[#ffd814] px-4 py-3
+                                       text-[14px] font-medium text-[#0f1111]
+                                       shadow-[inset_0_-1px_0_rgba(0,0,0,0.15)]
+                                       hover:bg-[#f7ca00] transition-colors active:scale-[.99]">
+                            Create account
+                        </button>
+                    </form>
+
+                    {{-- Bottom divider + switch link --}}
+                    <div class="mt-6 border-t border-[#eaeded] pt-5">
+                        <p class="text-[13px] text-[#565959]"
+                           x-text="mode === 'login' ? 'Need admin access?' : 'Already have an account?'"></p>
+                        <button type="button" @click="setMode(mode === 'login' ? 'register' : 'login')"
+                                class="mt-3 inline-flex w-full items-center justify-center rounded-full
+                                       border border-[#d5d9d9] bg-[#f7fafa] px-4 py-3
+                                       text-[14px] font-medium text-[#0f1111]
+                                       shadow-[inset_0_-1px_0_rgba(0,0,0,0.08)]
+                                       hover:bg-[#eef3f3] transition-colors">
+                            <span x-text="mode === 'login' ? 'Create an admin account' : 'Sign in instead'"></span>
+                        </button>
+                    </div>
+                </div>{{-- /card --}}
+            </div>{{-- /centered wrapper --}}
+        </div>{{-- /right panel --}}
+
+    </div>{{-- /shell --}}
+</div>
+
+<script>
+function authPage() {
+    return {
+        mode: 'login',
+        showLoginPw:  false,
+        showRegPw:    false,
+        showRegPwC:   false,
+
+        init() {
+            this.mode = document.body.dataset.initialMode || 'login';
+            this.$nextTick(() => lucide.createIcons());
+        },
+
+        setMode(m) {
+            this.mode = m;
+            this.$nextTick(() => lucide.createIcons());
+        },
+    };
+}
+</script>
 </body>
 </html>

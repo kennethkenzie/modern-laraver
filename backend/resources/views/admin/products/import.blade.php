@@ -3,108 +3,104 @@
 @section('title', 'Bulk Import')
 
 @section('content')
-<div class="-mx-4 -mt-4 sm:-mx-6 sm:-mt-6 min-h-screen bg-[#f7f7f8] px-4 pt-6 pb-16 sm:px-6 sm:pt-8 lg:px-8"
+<div class="-mx-4 -mt-4 sm:-mx-6 sm:-mt-6 min-h-screen bg-[#eaeded] px-4 pt-6 pb-16 sm:px-6 sm:pt-8 lg:px-8"
      x-data="importApp('{{ session('admin_token') }}')"
      x-init="init()">
 
-    <div class="mx-auto max-w-[860px]">
+    {{-- Header --}}
+    <div class="mb-5">
+        <h1 class="text-[22px] font-bold text-[#0f1111]">Bulk Import</h1>
+        <p class="mt-0.5 text-[13px] text-[#565959]">Upload a JSON or CSV file to synchronise your product catalog.</p>
+    </div>
 
-        {{-- Header --}}
-        <div class="mb-8 flex items-start gap-3">
-            <span class="mt-[10px] h-2.5 w-8 rounded-full bg-[#f6c400] flex-shrink-0"></span>
-            <div>
-                <h1 class="text-[28px] font-black uppercase tracking-tight text-gray-900">Bulk Import</h1>
-                <p class="mt-1 text-sm text-gray-500">Upload a JSON or CSV file to synchronise your product catalog.</p>
-            </div>
-        </div>
+    {{-- Main card --}}
+    <div class="rounded-lg border bg-white p-8 shadow-[0_1px_3px_rgba(15,17,17,0.08)]"
+         :class="processing ? 'border-[#007185] ring-2 ring-[rgba(0,113,133,0.12)]' : 'border-[#d5d9d9]'">
 
-        {{-- Main card --}}
-        <div class="rounded-3xl border border-gray-200 bg-white p-10 shadow-sm" :class="processing ? 'ring-4 ring-blue-50 border-[#114f8f]' : ''">
-
-            {{-- Result state --}}
-            <template x-if="result">
-                <div class="text-center">
-                    <div class="mx-auto mb-8 flex h-20 w-20 items-center justify-center rounded-3xl bg-green-50 text-green-600">
-                        <i data-lucide="check-circle-2" class="h-10 w-10"></i>
-                    </div>
-                    <h2 class="text-2xl font-black uppercase text-gray-900" x-text="result.message"></h2>
-                    <div class="mt-8 grid grid-cols-3 gap-6">
-                        <div class="rounded-xl border border-gray-100 bg-gray-50/50 p-6 text-center">
-                            <span class="block text-[11px] font-black uppercase tracking-widest text-gray-400">Processed</span>
-                            <span class="text-2xl font-black text-gray-900" x-text="result.created + result.updated"></span>
-                        </div>
-                        <div class="rounded-xl border border-gray-100 bg-gray-50/50 p-6 text-center">
-                            <span class="block text-[11px] font-black uppercase tracking-widest text-gray-400">Errors</span>
-                            <span class="text-2xl font-black text-red-500" x-text="result.failed"></span>
-                        </div>
-                        <div class="rounded-xl border border-gray-100 bg-gray-50/50 p-6 text-center text-[#114f8f]">
-                            <span class="block text-[11px] font-black uppercase tracking-widest text-gray-400 opacity-60">Success</span>
-                            <span class="text-2xl font-black" x-text="result.failed === 0 ? '100%' : Math.round(((result.created + result.updated) / (result.created + result.updated + result.failed)) * 100) + '%'"></span>
-                        </div>
-                    </div>
-                    <template x-if="result.errors && result.errors.length > 0">
-                        <div class="mt-8 rounded-xl border border-red-100 bg-red-50/50 p-6 text-left">
-                            <h3 class="mb-4 text-xs font-black uppercase tracking-widest text-red-600">Error Log</h3>
-                            <ul class="max-h-40 space-y-2 overflow-y-auto text-sm text-red-700">
-                                <template x-for="(e, i) in result.errors" :key="i">
-                                    <li class="flex gap-2"><span class="font-black opacity-40">•</span><span x-text="e"></span></li>
-                                </template>
-                            </ul>
-                        </div>
-                    </template>
-                    <button @click="result = null"
-                        class="mt-10 inline-flex h-14 items-center gap-3 rounded-2xl bg-[#111827] px-10 text-[15px] font-black uppercase tracking-wide text-white transition hover:bg-black active:scale-95">
-                        Import Another File
-                    </button>
+        {{-- Result state --}}
+        <template x-if="result">
+            <div class="text-center">
+                <div class="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-lg border border-[#c3e6cb] bg-[#d4edda] text-[#155724]">
+                    <i data-lucide="check-circle-2" class="h-7 w-7"></i>
                 </div>
-            </template>
+                <h2 class="text-[20px] font-bold text-[#0f1111]" x-text="result.message"></h2>
+                <div class="mt-6 grid grid-cols-3 gap-4">
+                    <div class="rounded-md border border-[#d5d9d9] bg-[#f7fafa] p-5 text-center">
+                        <span class="block text-[11px] font-bold uppercase tracking-wider text-[#565959]">Processed</span>
+                        <span class="mt-2 block text-[26px] font-bold text-[#0f1111]" x-text="result.created + result.updated"></span>
+                    </div>
+                    <div class="rounded-md border border-[#d5d9d9] bg-[#f7fafa] p-5 text-center">
+                        <span class="block text-[11px] font-bold uppercase tracking-wider text-[#565959]">Errors</span>
+                        <span class="mt-2 block text-[26px] font-bold text-[#b12704]" x-text="result.failed"></span>
+                    </div>
+                    <div class="rounded-md border border-[#d5d9d9] bg-[#f7fafa] p-5 text-center">
+                        <span class="block text-[11px] font-bold uppercase tracking-wider text-[#565959]">Success</span>
+                        <span class="mt-2 block text-[26px] font-bold text-[#007185]"
+                            x-text="result.failed === 0 ? '100%' : Math.round(((result.created + result.updated) / (result.created + result.updated + result.failed)) * 100) + '%'"></span>
+                    </div>
+                </div>
+                <template x-if="result.errors && result.errors.length > 0">
+                    <div class="mt-6 rounded-md border border-[#f5c6cb] bg-[#fef2f2] p-5 text-left">
+                        <h3 class="mb-3 text-[11px] font-bold uppercase tracking-wider text-[#b12704]">Error Log</h3>
+                        <ul class="max-h-40 space-y-1.5 overflow-y-auto text-[13px] text-[#b12704]">
+                            <template x-for="(e, i) in result.errors" :key="i">
+                                <li class="flex gap-2"><span class="opacity-40">•</span><span x-text="e"></span></li>
+                            </template>
+                        </ul>
+                    </div>
+                </template>
+                <button @click="result = null"
+                    class="mt-8 inline-flex h-10 items-center gap-2 rounded-lg border border-[#fcd200] bg-[#ffd814] px-8 text-[14px] font-medium text-[#0f1111] shadow-[inset_0_-1px_0_rgba(0,0,0,0.15)] transition hover:bg-[#f7ca00]">
+                    Import Another File
+                </button>
+            </div>
+        </template>
 
-            {{-- Upload state --}}
-            <template x-if="!result">
-                <div class="mx-auto max-w-lg text-center">
-                    <div class="mb-8 inline-flex h-20 w-20 items-center justify-center rounded-3xl bg-[#114f8f]/5 text-[#114f8f]">
+        {{-- Upload state --}}
+        <template x-if="!result">
+            <div class="mx-auto max-w-lg text-center">
+                <div class="mb-6 inline-flex h-14 w-14 items-center justify-center rounded-lg border border-[#d5d9d9] bg-[#f0f2f2] text-[#565959]">
+                    <template x-if="processing">
+                        <i data-lucide="loader-2" class="h-7 w-7 animate-spin"></i>
+                    </template>
+                    <template x-if="!processing">
+                        <i data-lucide="upload" class="h-7 w-7"></i>
+                    </template>
+                </div>
+                <h2 class="text-[20px] font-bold text-[#0f1111]">Upload Product Data</h2>
+                <p class="mt-3 text-[14px] leading-relaxed text-[#565959]">
+                    Accepts <strong class="text-[#0f1111]">.json</strong> or <strong class="text-[#0f1111]">.csv</strong> files. JSON imports preserve all variants, media, and specs. CSV uses a flat schema.
+                </p>
+
+                <input type="file" id="importFile" accept=".json,.csv" class="hidden" @change="handleFile($event)" :disabled="processing" />
+
+                <div class="mt-8">
+                    <button @click="document.getElementById('importFile').click()" type="button"
+                        :disabled="processing"
+                        class="inline-flex h-11 items-center gap-2 rounded-lg border border-[#fcd200] bg-[#ffd814] px-8 text-[14px] font-medium text-[#0f1111] shadow-[inset_0_-1px_0_rgba(0,0,0,0.15)] transition hover:bg-[#f7ca00] disabled:opacity-50 active:scale-[.99]">
                         <template x-if="processing">
-                            <i data-lucide="loader-2" class="h-10 w-10 animate-spin"></i>
+                            <i data-lucide="loader-2" class="h-4 w-4 animate-spin"></i>
                         </template>
                         <template x-if="!processing">
-                            <i data-lucide="upload" class="h-10 w-10"></i>
+                            <i data-lucide="upload" class="h-4 w-4"></i>
                         </template>
-                    </div>
-                    <h2 class="text-2xl font-black text-gray-900">Upload Product Data</h2>
-                    <p class="mt-4 font-medium text-gray-500">
-                        Accepts <strong>.json</strong> or <strong>.csv</strong> files. JSON imports preserve all variants, media, and specs. CSV uses a flat schema.
-                    </p>
+                        <span x-text="processing ? 'Importing…' : 'Choose File (JSON / CSV)'"></span>
+                    </button>
+                </div>
 
-                    <input type="file" id="importFile" accept=".json,.csv" class="hidden" @change="handleFile($event)" :disabled="processing" />
-
-                    <div class="mt-10">
-                        <button @click="$el.previousElementSibling.previousElementSibling.click()" type="button"
-                            :disabled="processing"
-                            class="inline-flex h-14 items-center gap-3 rounded-2xl bg-[#114f8f] px-10 text-[15px] font-black uppercase tracking-wide text-white shadow-xl shadow-blue-900/10 transition hover:bg-[#0d3f74] disabled:opacity-50 active:scale-95">
-                            <template x-if="processing">
-                                <i data-lucide="loader-2" class="h-5 w-5 animate-spin"></i>
-                            </template>
-                            <template x-if="!processing">
-                                <i data-lucide="upload" class="h-5 w-5"></i>
-                            </template>
-                            <span x-text="processing ? 'Importing…' : 'Choose File (JSON / CSV)'"></span>
-                        </button>
-                    </div>
-
-                    <div class="mt-10 rounded-xl border border-gray-100 bg-gray-50/50 p-5 text-left">
-                        <div class="flex items-start gap-3">
-                            <i data-lucide="alert-triangle" class="mt-0.5 h-5 w-5 text-gray-400"></i>
-                            <div>
-                                <p class="text-[12px] font-black uppercase tracking-widest text-gray-700">CSV Schema</p>
-                                <p class="mt-1 text-[11px] font-medium text-gray-500">
-                                    Name, Slug, Brand, ListPrice, SalePrice, Category, SKU, Stock, ImageURL
-                                </p>
-                            </div>
+                <div class="mt-8 rounded-md border border-[#d5d9d9] bg-[#f7fafa] p-4 text-left">
+                    <div class="flex items-start gap-3">
+                        <i data-lucide="info" class="mt-0.5 h-4 w-4 shrink-0 text-[#565959]"></i>
+                        <div>
+                            <p class="text-[12px] font-bold text-[#0f1111]">CSV Schema</p>
+                            <p class="mt-0.5 text-[12px] text-[#565959]">
+                                Name, Slug, Brand, ListPrice, SalePrice, Category, SKU, Stock, ImageURL
+                            </p>
                         </div>
                     </div>
                 </div>
-            </template>
-        </div>
+            </div>
+        </template>
     </div>
 </div>
 @endsection

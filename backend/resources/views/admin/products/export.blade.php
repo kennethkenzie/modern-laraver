@@ -3,52 +3,55 @@
 @section('title', 'Bulk Export')
 
 @section('content')
-<div class="-mx-4 -mt-4 sm:-mx-6 sm:-mt-6 min-h-screen bg-[#f7f7f8] px-4 pt-6 pb-16 sm:px-6 sm:pt-8 lg:px-8"
+<div class="-mx-4 -mt-4 sm:-mx-6 sm:-mt-6 min-h-screen bg-[#eaeded] px-4 pt-6 pb-16 sm:px-6 sm:pt-8 lg:px-8"
      x-data="exportApp('{{ session('admin_token') }}')"
      x-init="init()">
 
-    <div class="mx-auto max-w-[860px]">
+    {{-- Header --}}
+    <div class="mb-5">
+        <h1 class="text-[22px] font-bold text-[#0f1111]">Bulk Export</h1>
+        <p class="mt-0.5 text-[13px] text-[#565959]">Download a complete JSON backup of your entire product catalog.</p>
+    </div>
 
-        {{-- Header --}}
-        <div class="mb-8 flex items-start gap-3">
-            <span class="mt-[10px] h-2.5 w-8 rounded-full bg-[#f6c400] flex-shrink-0"></span>
-            <div>
-                <h1 class="text-[28px] font-black uppercase tracking-tight text-gray-900">Bulk Export</h1>
-                <p class="mt-1 text-sm text-gray-500">Download a complete JSON backup of your entire product catalog.</p>
+    {{-- Card --}}
+    <div class="rounded-lg border border-[#d5d9d9] bg-white p-8 shadow-[0_1px_3px_rgba(15,17,17,0.08)]">
+        <div class="mx-auto max-w-lg text-center">
+
+            <div class="mb-6 inline-flex h-16 w-16 items-center justify-center rounded-lg border border-[#d5d9d9] bg-[#f0f2f2] text-[#565959]">
+                <i data-lucide="download" class="h-8 w-8"></i>
             </div>
-        </div>
 
-        {{-- Card --}}
-        <div class="rounded-3xl border border-gray-200 bg-white p-10 shadow-sm">
-            <div class="mx-auto max-w-lg text-center">
-                <div class="mb-8 inline-flex h-20 w-20 items-center justify-center rounded-3xl bg-blue-50 text-[#114f8f]">
-                    <i data-lucide="download" class="h-10 w-10"></i>
-                </div>
-                <h2 class="text-2xl font-black text-gray-900">Download Catalog Backup</h2>
-                <p class="mt-4 font-medium text-gray-500">
-                    Generates a full high-fidelity JSON export of all products, including variants, categories, media URLs, and technical specifications.
-                </p>
+            <h2 class="text-[20px] font-bold text-[#0f1111]">Download Catalog Backup</h2>
+            <p class="mt-3 text-[14px] leading-relaxed text-[#565959]">
+                Generates a full high-fidelity JSON export of all products, including variants, categories, media URLs, and technical specifications.
+            </p>
 
-                <button @click="doExport()" :disabled="exporting" type="button"
-                    class="mt-10 inline-flex h-14 items-center gap-3 rounded-2xl bg-[#111827] px-10 text-[15px] font-black uppercase tracking-wide text-white transition hover:bg-black disabled:opacity-50 active:scale-95">
-                    <template x-if="exporting">
-                        <i data-lucide="loader-2" class="h-5 w-5 animate-spin"></i>
-                    </template>
-                    <template x-if="!exporting">
-                        <i data-lucide="download" class="h-5 w-5"></i>
-                    </template>
-                    <span x-text="exporting ? 'Compiling Dataset…' : 'Generate Export File'"></span>
-                </button>
-
-                <div class="mt-8 flex items-center justify-center gap-6 text-[11px] font-black uppercase tracking-widest text-gray-400">
-                    <span class="flex items-center gap-2"><span class="h-1.5 w-1.5 rounded-full bg-green-500"></span>Full Metadata</span>
-                    <span class="flex items-center gap-2"><span class="h-1.5 w-1.5 rounded-full bg-green-500"></span>Media URLs</span>
-                    <span class="flex items-center gap-2"><span class="h-1.5 w-1.5 rounded-full bg-green-500"></span>Inventory</span>
-                </div>
-
-                <template x-if="error">
-                    <p class="mt-6 rounded-xl bg-red-50 px-4 py-3 text-sm font-bold text-red-600" x-text="error"></p>
+            <button @click="doExport()" :disabled="exporting" type="button"
+                class="mt-8 inline-flex h-11 items-center gap-2 rounded-lg border border-[#fcd200] bg-[#ffd814] px-8 text-[14px] font-medium text-[#0f1111] shadow-[inset_0_-1px_0_rgba(0,0,0,0.15)] transition hover:bg-[#f7ca00] disabled:opacity-50 active:scale-[.99]">
+                <template x-if="exporting">
+                    <i data-lucide="loader-2" class="h-4 w-4 animate-spin"></i>
                 </template>
+                <template x-if="!exporting">
+                    <i data-lucide="download" class="h-4 w-4"></i>
+                </template>
+                <span x-text="exporting ? 'Compiling Dataset…' : 'Generate Export File'"></span>
+            </button>
+
+            <div class="mt-8 flex items-center justify-center gap-6">
+                <span class="flex items-center gap-1.5 text-[12px] font-bold text-[#565959]">
+                    <span class="h-1.5 w-1.5 rounded-full bg-[#007185]"></span>Full Metadata
+                </span>
+                <span class="flex items-center gap-1.5 text-[12px] font-bold text-[#565959]">
+                    <span class="h-1.5 w-1.5 rounded-full bg-[#007185]"></span>Media URLs
+                </span>
+                <span class="flex items-center gap-1.5 text-[12px] font-bold text-[#565959]">
+                    <span class="h-1.5 w-1.5 rounded-full bg-[#007185]"></span>Inventory
+                </span>
+            </div>
+
+            <div x-show="error"
+                class="mt-6 rounded-md border border-[#f5c6cb] bg-[#fef2f2] px-4 py-3 text-[13px] font-medium text-[#b12704]"
+                x-text="error">
             </div>
         </div>
     </div>

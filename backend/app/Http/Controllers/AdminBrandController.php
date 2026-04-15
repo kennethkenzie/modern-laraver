@@ -5,12 +5,20 @@ namespace App\Http\Controllers;
 use App\Models\Brand;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 
 class AdminBrandController extends Controller
 {
     public function index(): JsonResponse
     {
+        if (!Schema::hasTable('brands')) {
+            return response()->json([
+                'brands' => [],
+                'message' => 'Brands table is missing. Run the brands migration first.',
+            ]);
+        }
+
         $brands = Brand::orderBy('sort_order')->orderBy('name')->get()
             ->map(fn ($b) => $this->format($b));
 
@@ -19,6 +27,10 @@ class AdminBrandController extends Controller
 
     public function store(Request $request): JsonResponse
     {
+        if (!Schema::hasTable('brands')) {
+            return response()->json(['message' => 'Brands table is missing. Run the brands migration first.'], 503);
+        }
+
         $data = $request->validate([
             'name'            => ['required', 'string', 'max:255'],
             'slug'            => ['nullable', 'string', 'max:255'],
@@ -50,6 +62,10 @@ class AdminBrandController extends Controller
 
     public function update(Request $request, string $id): JsonResponse
     {
+        if (!Schema::hasTable('brands')) {
+            return response()->json(['message' => 'Brands table is missing. Run the brands migration first.'], 503);
+        }
+
         $brand = Brand::findOrFail($id);
 
         $data = $request->validate([
@@ -86,6 +102,10 @@ class AdminBrandController extends Controller
 
     public function destroy(string $id): JsonResponse
     {
+        if (!Schema::hasTable('brands')) {
+            return response()->json(['message' => 'Brands table is missing. Run the brands migration first.'], 503);
+        }
+
         Brand::findOrFail($id)->delete();
         return response()->json(['message' => 'Brand deleted.']);
     }

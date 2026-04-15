@@ -3,29 +3,37 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="csrf-token" content="{{ csrf_token() }}" />
     <title>@yield('title', 'Dashboard') — Modern Electronics Admin</title>
 
-    {{-- Tailwind CSS v3 CDN --}}
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['-apple-system','BlinkMacSystemFont','Segoe UI','Inter','Roboto','sans-serif'],
-                    },
-                }
-            }
-        }
-    </script>
-
-    {{-- Alpine.js --}}
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-
-    {{-- Lucide Icons --}}
-    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
-
+    {{-- Amazon Ember — same font family used by the Next.js storefront --}}
     <style>
+        @font-face {
+            font-family: "Amazon Ember";
+            src: url("{{ asset('fonts/AmazonEmber_Rg.ttf') }}") format("truetype");
+            font-weight: 400; font-style: normal; font-display: swap;
+        }
+        @font-face {
+            font-family: "Amazon Ember";
+            src: url("{{ asset('fonts/Amazon-Ember-Medium.ttf') }}") format("truetype");
+            font-weight: 500; font-style: normal; font-display: swap;
+        }
+        @font-face {
+            font-family: "Amazon Ember";
+            src: url("{{ asset('fonts/AmazonEmber_Bd.ttf') }}") format("truetype");
+            font-weight: 700; font-style: normal; font-display: swap;
+        }
+        @font-face {
+            font-family: "Amazon Ember Display";
+            src: url("{{ asset('fonts/AmazonEmberDisplay_Rg.ttf') }}") format("truetype");
+            font-weight: 400; font-style: normal; font-display: swap;
+        }
+        @font-face {
+            font-family: "Amazon Ember Display";
+            src: url("{{ asset('fonts/AmazonEmberDisplay_Bd.ttf') }}") format("truetype");
+            font-weight: 700; font-style: normal; font-display: swap;
+        }
+
         [x-cloak] { display: none !important; }
         .scrollbar-hide::-webkit-scrollbar { display: none; }
         .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
@@ -37,10 +45,43 @@
         .nav-children.closed { max-height: 0; opacity: 0; }
         .nav-children.open   { max-height: 800px; opacity: 1; }
     </style>
+
+    {{-- Tailwind CSS v3 CDN --}}
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans:    ['"Amazon Ember"','Arial','Helvetica','sans-serif'],
+                        display: ['"Amazon Ember Display"','"Amazon Ember"','Arial','Helvetica','sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+
+    {{-- Alpine.js --}}
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    {{-- Lucide Icons --}}
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 </head>
 
 <body class="bg-[#f8fbff] text-[#111827] font-sans antialiased"
       x-data="dashboardApp()" x-init="init()">
+    @php
+        $frontendBrand = [
+            'logoUrl' => '',
+            'logoAlt' => '',
+            'siteTitle' => 'Modern Electronics',
+        ];
+
+        $frontendSettings = \App\Models\SiteSettings::find('frontend_data');
+        $frontendPayload = $frontendSettings ? json_decode($frontendSettings->value, true) : [];
+        $frontendNavbar = is_array($frontendPayload['navbar'] ?? null) ? $frontendPayload['navbar'] : [];
+        $frontendBrand = array_replace($frontendBrand, $frontendNavbar);
+    @endphp
 
     {{-- Mobile sidebar overlay --}}
     <div x-show="sidebarOpen"
@@ -63,27 +104,19 @@
 
             {{-- Logo / Brand --}}
             <div class="flex items-center gap-3 px-6 py-8">
-                <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#f6c400] shadow-lg shadow-yellow-500/20">
-                    <i data-lucide="shopping-cart" class="h-[18px] w-[18px] text-[#111827]"></i>
-                </div>
-                <div>
-                    <div class="text-[16px] font-black uppercase tracking-tight text-white">Modern Electronics</div>
-                    <div class="text-[11px] font-bold uppercase tracking-widest text-gray-500">Control Center</div>
-                </div>
-            </div>
-
-            {{-- Quick Actions --}}
-            <div class="px-4">
-                <div class="flex gap-3">
-                    <a href="{{ route('dashboard.products.add') }}"
-                       class="flex h-12 flex-1 items-center justify-center gap-2 rounded-xl border border-yellow-300/20 bg-[#f6c400] px-4 text-[15px] font-bold text-[#111827] shadow-xl shadow-yellow-500/10 transition-all hover:bg-[#ffcf00]">
-                        <i data-lucide="plus" class="h-[18px] w-[18px]"></i>
-                        Add Product
-                    </a>
-                    <button class="flex h-12 w-12 items-center justify-center rounded-xl border border-white/10 bg-[#114f8f] text-white transition-colors hover:bg-[#0d3f74]">
-                        <i data-lucide="clipboard-list" class="h-[18px] w-[18px]"></i>
-                    </button>
-                </div>
+                @if (!empty($frontendBrand['logoUrl']))
+                    <img src="{{ $frontendBrand['logoUrl'] }}"
+                         alt="{{ $frontendBrand['logoAlt'] ?: $frontendBrand['siteTitle'] }}"
+                         class="h-12 w-auto max-w-full object-contain" />
+                @else
+                    <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#f6c400] shadow-lg shadow-yellow-500/20">
+                        <i data-lucide="shopping-cart" class="h-[18px] w-[18px] text-[#111827]"></i>
+                    </div>
+                    <div>
+                        <div class="text-[16px] font-black uppercase tracking-tight text-white">Modern Electronics</div>
+                        <div class="text-[11px] font-bold uppercase tracking-widest text-gray-500">Control Center</div>
+                    </div>
+                @endif
             </div>
 
             {{-- Navigation --}}
@@ -134,9 +167,9 @@
                             <a href="{{ route('dashboard.products.add') }}"
                                class="block rounded-lg px-3 py-2 text-[14px] transition hover:bg-white/5 hover:text-white
                                       {{ request()->routeIs('dashboard.products.add') ? 'text-white font-semibold' : 'text-gray-400' }}">Add New Product</a>
-                            <a href="{{ route('dashboard.products.brands') }}"
+                            <a href="{{ route('dashboard.products.brand') }}"
                                class="block rounded-lg px-3 py-2 text-[14px] transition hover:bg-white/5 hover:text-white
-                                      {{ request()->routeIs('dashboard.products.brands') ? 'text-white font-semibold' : 'text-gray-400' }}">Brand</a>
+                                      {{ request()->routeIs('dashboard.products.brand') || request()->routeIs('dashboard.products.brands') ? 'text-white font-semibold' : 'text-gray-400' }}">Brand</a>
                             <a href="{{ route('dashboard.products.categories') }}"
                                class="block rounded-lg px-3 py-2 text-[14px] transition hover:bg-white/5 hover:text-white
                                       {{ request()->routeIs('dashboard.products.categories') ? 'text-white font-semibold' : 'text-gray-400' }}">Categories</a>
@@ -156,8 +189,9 @@
                     </div>
 
                     {{-- Customers --}}
-                    <a href="#"
-                       class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 font-medium text-gray-400 transition hover:bg-white/5 hover:text-white">
+                    <a href="{{ route('dashboard.customers') }}"
+                       class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 transition
+                              {{ request()->routeIs('dashboard.customers') ? 'bg-[#114f8f] text-white shadow-lg shadow-blue-900/20 font-semibold' : 'text-gray-400 hover:bg-white/5 hover:text-white font-medium' }}">
                         <i data-lucide="users" class="h-[18px] w-[18px] shrink-0"></i>
                         <span>Customers</span>
                     </a>
@@ -259,19 +293,54 @@
                             <span>Reviews</span>
                         </a>
 
-                        {{-- Messages with badge --}}
-                        <a href="#" class="flex w-full items-center justify-between rounded-xl px-3 py-2.5 font-medium text-gray-400 transition hover:bg-white/5 hover:text-white">
+                        {{-- Messages with live unread badge --}}
+                        @php
+                            try {
+                                $unreadCount = \App\Models\ContactMessage::where('status', 'unread')->count();
+                            } catch (\Throwable $e) {
+                                $unreadCount = 0;
+                            }
+                        @endphp
+                        <a href="{{ route('dashboard.messages') }}"
+                           class="flex w-full items-center justify-between rounded-xl px-3 py-2.5 transition
+                                  {{ request()->routeIs('dashboard.messages*') ? 'bg-[#114f8f] text-white shadow-lg shadow-blue-900/20 font-semibold' : 'text-gray-400 hover:bg-white/5 hover:text-white font-medium' }}">
                             <span class="flex items-center gap-3">
                                 <i data-lucide="message-square" class="h-[18px] w-[18px] shrink-0"></i>
                                 <span>Messages</span>
                             </span>
-                            <span class="rounded-full bg-[#f6c400] px-2.5 py-1 text-[11px] font-black text-[#111827]">12</span>
+                            @if ($unreadCount > 0)
+                                <span class="rounded-full bg-[#f6c400] px-2.5 py-1 text-[11px] font-black text-[#111827]">{{ $unreadCount }}</span>
+                            @endif
                         </a>
 
-                        <a href="#" class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 font-medium text-gray-400 transition hover:bg-white/5 hover:text-white">
-                            <i data-lucide="file-text" class="h-[18px] w-[18px] shrink-0"></i>
-                            <span>Pages</span>
-                        </a>
+                        {{-- Pages (expandable) --}}
+                        <div x-data="{ open: {{ request()->routeIs('dashboard.pages.*') ? 'true' : 'false' }} }">
+                            <button @click="open = !open"
+                                    class="flex w-full items-center justify-between rounded-xl px-3 py-2.5 font-medium transition
+                                           {{ request()->routeIs('dashboard.pages.*') ? 'bg-[#114f8f]/30 text-white' : 'text-gray-400 hover:bg-white/5 hover:text-white' }}">
+                                <span class="flex items-center gap-3">
+                                    <i data-lucide="file-text" class="h-[18px] w-[18px] shrink-0"></i>
+                                    <span>Pages</span>
+                                </span>
+                                <i data-lucide="chevron-down" class="h-4 w-4 transition-transform duration-200"
+                                   :class="open ? 'rotate-180' : ''"></i>
+                            </button>
+                            <div x-show="open"
+                                 x-transition:enter="transition ease-out duration-200"
+                                 x-transition:enter-start="opacity-0 -translate-y-1"
+                                 x-transition:enter-end="opacity-100 translate-y-0"
+                                 x-transition:leave="transition ease-in duration-150"
+                                 x-transition:leave-start="opacity-100 translate-y-0"
+                                 x-transition:leave-end="opacity-0 -translate-y-1"
+                                 class="ml-9 mt-1 space-y-1 border-l border-gray-800 pl-4">
+                                <a href="{{ route('dashboard.pages.about') }}"
+                                   class="block rounded-lg px-3 py-2 text-[14px] transition hover:bg-white/5 hover:text-white
+                                          {{ request()->routeIs('dashboard.pages.about') ? 'text-white font-semibold' : 'text-gray-400' }}">About Us</a>
+                                <a href="{{ route('dashboard.pages.contact') }}"
+                                   class="block rounded-lg px-3 py-2 text-[14px] transition hover:bg-white/5 hover:text-white
+                                          {{ request()->routeIs('dashboard.pages.contact') ? 'text-white font-semibold' : 'text-gray-400' }}">Contact</a>
+                            </div>
+                        </div>
                         <a href="#" class="flex w-full items-center justify-between rounded-xl px-3 py-2.5 font-medium text-gray-400 transition hover:bg-white/5 hover:text-white">
                             <span class="flex items-center gap-3">
                                 <i data-lucide="boxes" class="h-[18px] w-[18px] shrink-0"></i>
@@ -431,7 +500,7 @@
                            class="hidden items-center rounded-xl border border-gray-200 bg-white px-5 py-2.5 text-[14px] font-bold text-[#111827] transition-all hover:bg-gray-50 md:inline-flex">
                             View Store
                         </a>
-                        <a href="#"
+                        <a href="{{ route('dashboard.offers') }}"
                            class="hidden rounded-xl border border-yellow-200/20 bg-[#f6c400] px-5 py-2.5 text-[14px] font-black tracking-wide text-[#111827] shadow-lg shadow-yellow-500/10 transition-colors hover:bg-[#ffcf00] md:inline-flex">
                             Create Offer
                         </a>

@@ -3,10 +3,14 @@
 use App\Http\Controllers\AttributeSetsDashboardController;
 use App\Http\Controllers\BrandsDashboardController;
 use App\Http\Controllers\CategoriesDashboardController;
+use App\Http\Controllers\CustomersDashboardController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ExportDashboardController;
 use App\Http\Controllers\ImportDashboardController;
+use App\Http\Controllers\MessagesDashboardController;
+use App\Http\Controllers\OffersDashboardController;
 use App\Http\Controllers\OrdersDashboardController;
+use App\Http\Controllers\PagesDashboardController;
 use App\Http\Controllers\ProfileDashboardController;
 use App\Http\Controllers\ProductsDashboardController;
 use App\Http\Controllers\ShippingDashboardController;
@@ -18,6 +22,12 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return redirect()->route('web.login.page');
 });
+
+// /admin and /admin/* are common entry points — redirect to login (or dashboard if already signed in)
+Route::get('/admin', [WebAuthController::class, 'showLogin']);
+Route::get('/admin/{any}', function () {
+    return redirect()->route('web.login.page');
+})->where('any', '.*');
 
 Route::get('/login', [WebAuthController::class, 'showLogin'])->name('web.login.page');
 Route::post('/auth/login', [WebAuthController::class, 'login'])->name('web.login');
@@ -48,6 +58,7 @@ Route::middleware('web.dashboard')->group(function () {
 
     Route::get('/dashboard/products', [ProductsDashboardController::class, 'index'])->name('dashboard.products');
     Route::get('/dashboard/products/add', [ProductsDashboardController::class, 'add'])->name('dashboard.products.add');
+    Route::get('/dashboard/products/brand', [BrandsDashboardController::class, 'index'])->name('dashboard.products.brand');
     Route::get('/dashboard/products/brands', [BrandsDashboardController::class, 'index'])->name('dashboard.products.brands');
     Route::get('/dashboard/products/categories', [CategoriesDashboardController::class, 'index'])->name('dashboard.products.categories');
     Route::get('/dashboard/products/units', [UnitsDashboardController::class, 'index'])->name('dashboard.products.units');
@@ -55,4 +66,20 @@ Route::middleware('web.dashboard')->group(function () {
     Route::get('/dashboard/products/import', [ImportDashboardController::class, 'index'])->name('dashboard.products.import');
     Route::get('/dashboard/products/export', [ExportDashboardController::class, 'index'])->name('dashboard.products.export');
     Route::get('/dashboard/products/{id}', [ProductsDashboardController::class, 'show'])->name('dashboard.products.show');
+
+    Route::get('/dashboard/offers', [OffersDashboardController::class, 'index'])->name('dashboard.offers');
+
+    // Customers
+    Route::get('/dashboard/customers', [CustomersDashboardController::class, 'index'])->name('dashboard.customers');
+
+    // Messages
+    Route::get('/dashboard/messages', [MessagesDashboardController::class, 'index'])->name('dashboard.messages');
+    Route::patch('/dashboard/messages/{id}/read', [MessagesDashboardController::class, 'markRead'])->name('dashboard.messages.read');
+    Route::patch('/dashboard/messages/{id}/status', [MessagesDashboardController::class, 'updateStatus'])->name('dashboard.messages.status');
+
+    // Pages
+    Route::get('/dashboard/pages/about', [PagesDashboardController::class, 'about'])->name('dashboard.pages.about');
+    Route::patch('/dashboard/pages/about', [PagesDashboardController::class, 'updateAbout'])->name('dashboard.pages.about.update');
+    Route::get('/dashboard/pages/contact', [PagesDashboardController::class, 'contact'])->name('dashboard.pages.contact');
+    Route::patch('/dashboard/pages/contact', [PagesDashboardController::class, 'updateContact'])->name('dashboard.pages.contact.update');
 });

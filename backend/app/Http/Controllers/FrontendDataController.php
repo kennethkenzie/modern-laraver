@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Category;
+use App\Models\Offer;
 use App\Models\SiteSettings;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -110,6 +111,9 @@ class FrontendDataController extends Controller
             // Overlay live categories from the categories table
             $base['categories'] = $this->buildCategoryList($base);
 
+            // Overlay live offers from the offers table
+            $base['offers'] = $this->buildOfferList();
+
             return response()->json([
                 'data'       => $base,
                 'source'     => $row ? 'db' : 'default',
@@ -186,6 +190,62 @@ class FrontendDataController extends Controller
                 'slug'         => $cat->slug,
             ];
         })->values()->all();
+    }
+
+    private function buildOfferList(): array
+    {
+        return Offer::with([
+                'products:id,name,slug',
+                'products.media' => fn ($q) => $q->orderByDesc('is_primary')->orderBy('sort_order')->limit(1),
+                'categories:id,name,slug',
+            ])
+            ->where('is_active', true)
+            ->orderByDesc('is_featured')
+            ->orderBy('created_at')
+            ->get()
+            ->map(function (Offer $o) {
+                $firstProduct  = $o->products->first();
+                $firstCategory = $o->categories->first();
+
+                [$frontendTargetType, $targetValue, $targetImage, $targetTitle] = match ($o->target_type) {
+                    'products'   => [
+                        'product',
+                        $firstProduct?->slug ?? '',
+                        $firstProduct?->media->first()?->url ?? '',
+                        $firstProduct?->name ?? '',
+                    ],
+                    'categories' => [
+                        'category',
+                        $firstCategory?->slug ?? '',
+                        $firstCategory?->image_url ?? '',
+                        $firstCategory?->name ?? '',
+                    ],
+                    default => ['storewide', '', '', ''],
+                };
+
+                return [
+                    'id'           => $o->id,
+                    'title'        => $o->name,
+                    'code'         => $o->code ?? '',
+                    'headline'     => $o->headline ?? $o->name,
+                    'description'  => $o->description ?? '',
+                    'discountType' => $o->type,
+                    'discountValue'=> (float) $o->value,
+                    'startDate'    => $o->starts_at?->format('Y-m-d') ?? '',
+                    'endDate'      => $o->expires_at?->format('Y-m-d') ?? '',
+                    'targetType'   => $frontendTargetType,
+                    'targetValue'  => $targetValue,
+                    'targetImage'  => $targetImage,
+                    'targetTitle'  => $targetTitle,
+                    'badgeText'    => $o->badge_text ?? '',
+                    'bannerImage'  => $o->banner_image ?? '',
+                    'isActive'     => (bool) $o->is_active,
+                    'isFeatured'   => (bool) $o->is_featured,
+                    'stackable'    => false,
+                ];
+            })
+            ->values()
+            ->all();
     }
 
     private function syncCategories(array $categories): void

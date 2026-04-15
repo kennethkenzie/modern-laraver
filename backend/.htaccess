@@ -1,0 +1,15 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Pass Authorization header through to PHP (required for Sanctum token auth)
+    RewriteCond %{HTTP:Authorization} .
+    RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+    # If the request is already inside /public, let it be handled normally
+    RewriteCond %{REQUEST_URI} ^/public/
+    RewriteRule ^ - [L]
+
+    # Forward everything else into the public/ folder transparently.
+    # The browser URL stays as-is (no /public/ visible to the user).
+    RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>

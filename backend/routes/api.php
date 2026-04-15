@@ -3,11 +3,13 @@
 use App\Http\Controllers\AdminAttributeSetController;
 use App\Http\Controllers\AdminBrandController;
 use App\Http\Controllers\AdminCategoryController;
+use App\Http\Controllers\AdminOfferController;
 use App\Http\Controllers\AdminProductController;
 use App\Http\Controllers\AdminUnitController;
 use App\Http\Controllers\AdminUploadController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CloudinaryController;
+use App\Http\Controllers\ContactMessageController;
 use App\Http\Controllers\FrontendDataController;
 use App\Http\Controllers\MediaController;
 use App\Http\Controllers\ProductController;
@@ -21,6 +23,11 @@ use Illuminate\Support\Facades\Route;
 
 // Storefront data (navbar, hero, categories, settings …)
 Route::get('/frontend-data', [FrontendDataController::class, 'show']);
+
+// Contact form submission + public contact page data
+Route::post('/contact', [ContactMessageController::class, 'store']);
+Route::get('/pages/contact', [\App\Http\Controllers\PagesDashboardController::class, 'publicContactData']);
+Route::get('/pages/about', [\App\Http\Controllers\PagesDashboardController::class, 'publicAboutData']);
 
 // Auth
 Route::prefix('auth')->group(function () {
@@ -88,6 +95,15 @@ Route::prefix('admin')->middleware(['auth:sanctum', 'admin'])->group(function ()
     Route::post('/attribute-sets',        [AdminAttributeSetController::class, 'store']);
     Route::patch('/attribute-sets/{id}',  [AdminAttributeSetController::class, 'update']);
     Route::delete('/attribute-sets/{id}', [AdminAttributeSetController::class, 'destroy']);
+
+    // Offers
+    Route::get('/offers',                    [AdminOfferController::class, 'index']);
+    Route::post('/offers',                   [AdminOfferController::class, 'store']);
+    Route::put('/offers/{id}',               [AdminOfferController::class, 'update']);
+    Route::patch('/offers/{id}/toggle',      [AdminOfferController::class, 'toggle']);
+    Route::delete('/offers/{id}',            [AdminOfferController::class, 'destroy']);
+    Route::get('/offers/product-search',     [AdminOfferController::class, 'productSearch']);
+    Route::get('/offers/categories',         [AdminOfferController::class, 'categoryList']);
 
     // File upload (stores to public storage disk)
     Route::post('/upload', [AdminUploadController::class, 'store']);
