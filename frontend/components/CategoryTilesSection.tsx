@@ -154,10 +154,10 @@ export default function CategoryTilesSection({
       if (idx === 2 && applianceFeature && applianceTiles.length > 0) {
         return {
           ...card,
-          title: applianceFeature.title,
+          title: "Home Appliance",
           tiles: applianceTiles,
           cta: {
-            label: "Shop appliance parts",
+            label: "Shop appliances",
             href: applianceFeature.href,
           },
         };

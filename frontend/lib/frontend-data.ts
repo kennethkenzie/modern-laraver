@@ -275,9 +275,9 @@ export const defaultFrontendData: FrontendData = {
       },
       {
         // Mockup tiles removed — populated from live data at runtime.
-        title: "Home appliances & replacement parts",
+        title: "Home Appliance",
         tiles: [],
-        cta: { label: "Shop appliance parts", href: "/appliances" },
+        cta: { label: "Shop appliances", href: "/appliances" },
       },
       {
         // Mockup tiles removed — populated from live data at runtime.
