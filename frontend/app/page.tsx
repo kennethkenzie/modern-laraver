@@ -1,4 +1,4 @@
-
+import type { Metadata } from "next";
 import { mergeFrontendData } from "@/lib/frontend-data-merge";
 import { readFrontendDataFromPrisma } from "@/lib/site-settings";
 import NavBar from "@/components/NavBar";
@@ -10,6 +10,36 @@ import LatestProductsSection from "@/components/LatestProductsSection";
 import Footer from "@/components/Footer";
 import { getLatestPublishedProducts } from "@/lib/products-admin";
 import { getSparePartsCategoryFeature, getApplianceCategoryFeature } from "@/lib/products-public";
+import {
+  DEFAULT_TITLE,
+  DEFAULT_DESCRIPTION,
+  DEFAULT_KEYWORDS,
+} from "@/lib/seo";
+
+export async function generateMetadata(): Promise<Metadata> {
+  // Home page stays on the site-wide default title so Google shows the full
+  // keyword-rich branded title for navigational queries.
+  const title = DEFAULT_TITLE;
+  const description = DEFAULT_DESCRIPTION;
+
+  return {
+    title,
+    description,
+    keywords: DEFAULT_KEYWORDS,
+    alternates: { canonical: "/" },
+    openGraph: {
+      title,
+      description,
+      url: "/",
+      type: "website",
+    },
+    twitter: {
+      title,
+      description,
+      card: "summary_large_image",
+    },
+  };
+}
 
 export default async function Home() {
   const frontendData =

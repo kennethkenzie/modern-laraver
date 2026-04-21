@@ -118,39 +118,52 @@ export default function CategoryTilesSection({
       return cards;
     }
 
-    return cards.map((card, idx) =>
-      idx === 0
-        ? {
-            ...card,
-            title: "Top categories in Spare parts",
-            tiles: featuredSparePartsTiles,
-            cta: {
-              label: "Shop Spare parts",
-              href: sparePartsFeature?.href || card.cta.href,
-            },
-          }
-        : idx === 1 && sparePartsFeature && sparePartsTiles.length > 0
-        ? {
-            ...card,
-            title: `More from ${sparePartsFeature.title}`,
-            tiles: sparePartsTiles,
-            cta: {
-              label: `Shop ${sparePartsFeature.title}`,
-              href: sparePartsFeature.href,
-            },
-          }
-        : idx === 2 && applianceFeature && applianceTiles.length > 0
-        ? {
-            ...card,
-            title: applianceFeature.title,
-            tiles: applianceTiles,
-            cta: {
-              label: "Shop appliance parts",
-              href: applianceFeature.href,
-            },
-          }
-        : card
-    );
+    // Prefer featured spare-parts tiles; fall back to the rotating general
+    // spare-parts tiles so the "Top categories in Spare parts" card is never
+    // empty when we actually have spare-parts products.
+    const topSparePartsTiles =
+      featuredSparePartsTiles.length > 0
+        ? featuredSparePartsTiles
+        : sparePartsTiles;
+
+    return cards.map((card, idx) => {
+      if (idx === 0) {
+        // Only override when we actually have spare-parts products to show.
+        if (topSparePartsTiles.length === 0) return card;
+        return {
+          ...card,
+          title: "Top categories in Spare parts",
+          tiles: topSparePartsTiles,
+          cta: {
+            label: "Shop Spare parts",
+            href: sparePartsFeature?.href || card.cta.href,
+          },
+        };
+      }
+      if (idx === 1 && sparePartsFeature && sparePartsTiles.length > 0) {
+        return {
+          ...card,
+          title: `More from ${sparePartsFeature.title}`,
+          tiles: sparePartsTiles,
+          cta: {
+            label: `Shop ${sparePartsFeature.title}`,
+            href: sparePartsFeature.href,
+          },
+        };
+      }
+      if (idx === 2 && applianceFeature && applianceTiles.length > 0) {
+        return {
+          ...card,
+          title: applianceFeature.title,
+          tiles: applianceTiles,
+          cta: {
+            label: "Shop appliance parts",
+            href: applianceFeature.href,
+          },
+        };
+      }
+      return card;
+    });
   }, [cards, featuredSparePartsTiles, sparePartsFeature, sparePartsTiles, applianceFeature, applianceTiles]);
 
   return (
@@ -190,7 +203,7 @@ export default function CategoryTilesSection({
                 </div>
               ) : (
                 <div className="mt-4 rounded-xl border border-dashed border-gray-200 bg-gray-50 px-4 py-10 text-center text-[13px] text-gray-500">
-                  No featured spare parts available yet.
+                  No products to show yet.
                 </div>
               )}
 

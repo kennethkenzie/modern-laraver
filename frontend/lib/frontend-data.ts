@@ -261,43 +261,28 @@ export const defaultFrontendData: FrontendData = {
   categoryTiles: {
     cards: [
       {
+        // Mockup tiles removed — this card is populated at runtime from the
+        // live Spare Parts category (see CategoryTilesSection + getSparePartsCategoryFeature).
         title: "Top categories in TV spare parts",
-        tiles: [
-          { label: "T-CON boards", image: "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=900&q=80", href: "/category/tcon" },
-          { label: "Main boards", image: "https://images.unsplash.com/photo-1555617981-dac3880eac6e?auto=format&fit=crop&w=900&q=80", href: "/category/main-boards" },
-          { label: "Power supply", image: "https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?auto=format&fit=crop&w=900&q=80", href: "/category/power-supply" },
-          { label: "LED backlights", image: "https://images.unsplash.com/photo-1563770660941-10a636076e17?auto=format&fit=crop&w=900&q=80", href: "/category/backlights" },
-        ],
+        tiles: [],
         cta: { label: "Shop TV parts", href: "/tv-parts" },
       },
       {
+        // Mockup tiles removed — populated from live data at runtime.
         title: "Repair tools & workshop essentials",
-        tiles: [
-          { label: "Rework stations", image: "https://images.unsplash.com/photo-1581092583537-20d51b4b4f8f?auto=format&fit=crop&w=900&q=80", href: "/category/rework-stations" },
-          { label: "Multimeters", image: "https://images.unsplash.com/photo-1586864387967-d02ef85d93e8?auto=format&fit=crop&w=900&q=80", href: "/category/multimeters" },
-          { label: "Soldering irons", image: "https://images.unsplash.com/photo-1581092334631-7b0c5ed9c4d7?auto=format&fit=crop&w=900&q=80", href: "/category/soldering" },
-          { label: "Signal finders", image: "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=900&q=80", href: "/category/signal-finders" },
-        ],
+        tiles: [],
         cta: { label: "Explore repair tools", href: "/tools" },
       },
       {
+        // Mockup tiles removed — populated from live data at runtime.
         title: "Home appliances & replacement parts",
-        tiles: [
-          { label: "Microwave parts", image: "https://images.unsplash.com/photo-1585655852389-6f9b9c8a2b1c?auto=format&fit=crop&w=900&q=80", href: "/category/microwave-parts" },
-          { label: "Fridge spares", image: "https://images.unsplash.com/photo-1586201375761-83865001e31b?auto=format&fit=crop&w=900&q=80", href: "/category/fridge-spares" },
-          { label: "Washing machine", image: "https://images.unsplash.com/photo-1581579186898-13e6b8e5b8c0?auto=format&fit=crop&w=900&q=80", href: "/category/washing-machine" },
-          { label: "Electric kettles", image: "https://images.unsplash.com/photo-1556228453-efd6c1ff04f6?auto=format&fit=crop&w=900&q=80", href: "/category/kettles" },
-        ],
+        tiles: [],
         cta: { label: "Shop appliance parts", href: "/appliances" },
       },
       {
+        // Mockup tiles removed — populated from live data at runtime.
         title: "Popular accessories for installers",
-        tiles: [
-          { label: "HDMI & AV cables", image: "https://images.unsplash.com/photo-1602524816604-3d0f42c7b9a8?auto=format&fit=crop&w=900&q=80", href: "/category/cables" },
-          { label: "TV remotes", image: "https://images.unsplash.com/photo-1617957743094-0c7c9dbe2c35?auto=format&fit=crop&w=900&q=80", href: "/category/remotes" },
-          { label: "Wall mounts", image: "https://images.unsplash.com/photo-1581345331967-6d7ccacb7002?auto=format&fit=crop&w=900&q=80", href: "/category/wall-mounts" },
-          { label: "Power adapters", image: "https://images.unsplash.com/photo-1580508244245-c446ca981a47?auto=format&fit=crop&w=900&q=80", href: "/category/adapters" },
-        ],
+        tiles: [],
         cta: { label: "Explore accessories", href: "/accessories" },
       },
     ],
@@ -311,54 +296,30 @@ export const defaultFrontendData: FrontendData = {
   relatedProducts: {
     title: "Products related to this item",
     sponsoredLabel: "Sponsored",
-    pageLabel: "Page 1 of 58",
+    pageLabel: "",
     products: [],
   },
   productDetails: {
-    title: "Instant Pot Duo Plus 9-in-1 Multicooker, Pressure Cooker, Slow Cook, Rice Maker, Steamer, Saute, Yogurt, Warmer & Sterilizer, Stainless Steel, 6 Quarts",
-    storeLabel: "Visit Modern Electronics Ltd",
-    rating: 4.4,
-    ratingsLabel: "52,048 ratings",
-    bestsellerLabel: "#1 Best Seller",
-    bestsellerCategory: "in Electric Pressure Cookers",
-    boughtLabel: "5K+ bought in past month",
-    priceMajor: "420",
-    priceMinor: ",000",
-    shippingLabel: "UGX 58,000 shipping to Uganda.",
-    inStockLabel: "In Stock",
-    deliveryLabel: "Thursday, March 19",
+    // Empty defaults — product data is sourced live from the backend via
+    // getPublicProductBySlug (see app/product/[slug]/page.tsx). This shape is
+    // kept only to satisfy the FrontendData type.
+    title: "",
+    storeLabel: "",
+    rating: 0,
+    ratingsLabel: "",
+    bestsellerLabel: "",
+    bestsellerCategory: "",
+    boughtLabel: "",
+    priceMajor: "",
+    priceMinor: "",
+    shippingLabel: "",
+    inStockLabel: "",
+    deliveryLabel: "",
     aboutTitle: "About this item",
-    aboutItems: [
-      "9 cooking functions: pressure cook, slow cook, saute, steam, sterilize, rice, soup, yogurt and warm.",
-      "Customizable smart programs to make everyday meals easy and consistent.",
-      "Intuitive display with cooking progress, time indicator and one-touch controls.",
-      "Durable stainless steel cooking pot with easy-clean interior and removable sealing parts.",
-    ],
-    gallery: [
-      { id: 1, image: "https://images.unsplash.com/photo-1585515656973-94d1ea4f5b0b?auto=format&fit=crop&w=900&q=80", alt: "Pressure cooker front view" },
-      { id: 2, image: "https://images.unsplash.com/photo-1556911220-bff31c812dba?auto=format&fit=crop&w=900&q=80", alt: "Pressure cooker in kitchen" },
-      { id: 3, image: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=900&q=80", alt: "Cooked meal example" },
-      { id: 4, image: "https://images.unsplash.com/photo-1585515656882-cfb0c9d8689b?auto=format&fit=crop&w=900&q=80", alt: "Open lid cooker detail" },
-      { id: 5, image: "https://images.unsplash.com/photo-1574269909862-7e1d70bb8078?auto=format&fit=crop&w=900&q=80", alt: "Preset cooking programs" },
-      { id: 6, image: "https://images.unsplash.com/photo-1505576399279-565b52d4ac71?auto=format&fit=crop&w=900&q=80", alt: "Top view" },
-      { id: 7, image: "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=900&q=80", alt: "Video preview", isVideo: true },
-    ],
-    sizes: [
-      { label: "3 Quarts", price: "UGX 285,000", oldPrice: "UGX 349,000" },
-      { label: "6 Quarts", price: "UGX 420,000", oldPrice: "UGX 489,000" },
-    ],
-    specs: [
-      { label: "Brand", value: "Modern Electronics Ltd" },
-      { label: "Capacity", value: "6 Quarts" },
-      { label: "Material", value: "Stainless steel" },
-      { label: "Color", value: "Stainless Plus" },
-      { label: "Finish Type", value: "Chrome" },
-      { label: "Product Dimensions", value: "12.2\"D x 13.39\"W x 12.99\"H" },
-      { label: "Special Feature", value: "Electric stovetop compatible" },
-      { label: "Wattage", value: "1000 watts" },
-      { label: "Item Weight", value: "12.35 Pounds" },
-      { label: "Control Method", value: "Touch" },
-    ],
+    aboutItems: [],
+    gallery: [],
+    sizes: [],
+    specs: [],
   },
   brands: [],
   categories: [],

@@ -1,4 +1,4 @@
-
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Star } from "lucide-react";
@@ -7,9 +7,57 @@ import SafeImage from "@/components/SafeImage";
 import { readFrontendDataFromPrisma } from "@/lib/site-settings";
 import { mergeFrontendData } from "@/lib/frontend-data-merge";
 import { getProductsByCategorySlug, getSearchSuggestionsByCategory } from "@/lib/products-public";
+import {
+  SITE_NAME,
+  SITE_URL,
+  absoluteUrl,
+  buildCategoryKeywords,
+  jsonLdString,
+} from "@/lib/seo";
 
 function formatUGX(value: number) {
   return `UGX ${value.toLocaleString("en-US")}`;
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const data = await getProductsByCategorySlug(slug);
+  if (!data) {
+    return {
+      title: "Category not found",
+      robots: { index: false, follow: false },
+    };
+  }
+
+  const title = `${data.title} in Uganda — Buy ${data.title} Online | Best Prices, Free Delivery Kampala`;
+  const description =
+    (data.description?.replace(/\s+/g, " ").trim().slice(0, 160)) ||
+    `Shop ${data.products.length} ${data.title} online in Uganda at ${SITE_NAME}. Genuine products, best prices in UGX, pay on delivery, fast delivery in Kampala, Wakiso, Entebbe, Jinja & Mbarara.`;
+  const canonical = `/category/${data.slug}`;
+
+  return {
+    title,
+    description,
+    alternates: { canonical },
+    keywords: buildCategoryKeywords(data.title, data.rootCategory),
+    openGraph: {
+      title,
+      description,
+      url: canonical,
+      type: "website",
+      images: data.image ? [{ url: data.image, alt: data.title }] : undefined,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: data.image ? [data.image] : undefined,
+    },
+  };
 }
 
 export default async function CategoryPage({
@@ -29,8 +77,43 @@ export default async function CategoryPage({
 
   const suggestions = await getSearchSuggestionsByCategory(categoryData.categoryId);
 
+  const breadcrumbLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: categoryData.title,
+        item: absoluteUrl(`/category/${categoryData.slug}`),
+      },
+    ],
+  };
+
+  const itemListLd = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: categoryData.title,
+    numberOfItems: categoryData.products.length,
+    itemListElement: categoryData.products.slice(0, 30).map((p, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      url: absoluteUrl(p.href),
+      name: p.name,
+    })),
+  };
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: jsonLdString(breadcrumbLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: jsonLdString(itemListLd) }}
+      />
       <NavBar
         searchSuggestions={suggestions}
         searchContextLabel={categoryData.title}

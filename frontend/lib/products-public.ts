@@ -211,18 +211,98 @@ export async function getFrequentlyViewedProducts(
   return getRelatedProductsForProduct(productId, categoryId, limit);
 }
 
-export async function getApplianceCategoryFeature(): Promise<{
+// ─── home "featured category" loaders ─────────────────────────
+//
+// These populate the 3 cards under the hero (CategoryTilesSection).
+// We locate a matching category by title/slug via the public frontend-data
+// endpoint, then load its products through /categories/{slug}/products.
+
+type FeatureCategory = {
   title: string;
   slug: string;
-  products: { id: string; name: string; image: string; href: string; price: number; isFeatured?: boolean }[];
-} | null> {
+  products: {
+    id: string;
+    name: string;
+    image: string;
+    href: string;
+    price: number;
+    isFeatured?: boolean;
+  }[];
+};
+
+async function findFirstActiveCategoryBy(
+  predicates: ((c: {
+    title: string;
+    slug: string;
+    rootCategory?: string;
+    isActive: boolean;
+  }) => boolean)[]
+): Promise<{ title: string; slug: string } | null> {
+  try {
+    const data = await apiFetch<{
+      categories: {
+        title: string;
+        slug: string;
+        rootCategory?: string;
+        isActive: boolean;
+      }[];
+    }>(`/frontend-data`);
+
+    const list = (data.categories ?? []).filter((c) => c.isActive !== false && c.slug);
+    for (const predicate of predicates) {
+      const hit = list.find(predicate);
+      if (hit) return { title: hit.title, slug: hit.slug };
+    }
+  } catch {
+    /* ignore */
+  }
   return null;
 }
 
-export async function getSparePartsCategoryFeature(): Promise<{
-  title: string;
-  slug: string;
-  products: { id: string; name: string; image: string; href: string; price: number; isFeatured?: boolean }[];
-} | null> {
-  return null;
+async function loadCategoryFeatureByCandidates(
+  predicates: ((c: {
+    title: string;
+    slug: string;
+    rootCategory?: string;
+    isActive: boolean;
+  }) => boolean)[]
+): Promise<FeatureCategory | null> {
+  const match = await findFirstActiveCategoryBy(predicates);
+  if (!match) return null;
+
+  const data = await getProductsByCategorySlug(match.slug);
+  if (!data || !data.products?.length) return null;
+
+  return {
+    title: data.title || match.title,
+    slug: data.slug || match.slug,
+    products: data.products.map((p) => ({
+      id: p.id,
+      name: p.name,
+      image: p.image,
+      href: p.href,
+      price: p.price,
+      // CategoryListingProduct doesn't include isFeatured; leave undefined so
+      // the UI falls back to the regular product list.
+    })),
+  };
+}
+
+export async function getSparePartsCategoryFeature(): Promise<FeatureCategory | null> {
+  const lc = (s?: string) => (s ?? "").toLowerCase();
+  return loadCategoryFeatureByCandidates([
+    (c) => /spare\s*parts?/i.test(c.title) || /spare[-_]?parts?/i.test(c.slug),
+    (c) => /tv\s*parts?/i.test(c.title) || /tv[-_]?parts?/i.test(c.slug),
+    (c) => /parts?/i.test(c.title) || /parts?/.test(lc(c.slug)),
+    (c) => lc(c.rootCategory).includes("spare") || lc(c.rootCategory).includes("parts"),
+  ]);
+}
+
+export async function getApplianceCategoryFeature(): Promise<FeatureCategory | null> {
+  const lc = (s?: string) => (s ?? "").toLowerCase();
+  return loadCategoryFeatureByCandidates([
+    (c) => /appliance/i.test(c.title) || /appliance/.test(lc(c.slug)),
+    (c) => lc(c.rootCategory).includes("appliance"),
+    (c) => /home/i.test(c.title) && /good|ware|appliance/i.test(c.title),
+  ]);
 }
