@@ -52,6 +52,8 @@ function createEmptyOffer(): Offer {
     endDate: nextWeek.toISOString().slice(0, 10),
     targetType: "storewide",
     targetValue: "",
+    targetImage: "",
+    targetTitle: "",
     badgeText: "Limited deal",
     bannerImage: "",
     isActive: true,
