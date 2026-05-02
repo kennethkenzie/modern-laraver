@@ -212,8 +212,38 @@ export default function NavBar({
     );
   };
 
+  const marqueeText = nav.marqueeText?.trim();
+  const showMarquee = nav.showMarquee !== false && Boolean(marqueeText);
+
   return (
     <header className="w-full">
+      {showMarquee ? (
+        <div className="w-full overflow-hidden bg-[#d62828] text-white">
+          <div className="relative flex whitespace-nowrap py-2">
+            <div className="animate-[marquee_28s_linear_infinite] pr-8 text-[12px] font-semibold uppercase tracking-[0.08em] sm:text-[13px]">
+              {marqueeText}
+            </div>
+            <div
+              aria-hidden="true"
+              className="animate-[marquee_28s_linear_infinite] pr-8 text-[12px] font-semibold uppercase tracking-[0.08em] sm:text-[13px]"
+            >
+              {marqueeText}
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      <style jsx>{`
+        @keyframes marquee {
+          0% {
+            transform: translateX(0%);
+          }
+          100% {
+            transform: translateX(-100%);
+          }
+        }
+      `}</style>
+
       <div className="w-full bg-white">
         <div className="mx-auto flex w-[98%] flex-wrap items-center gap-x-6 gap-y-2 px-4 py-3 text-[13px] text-gray-600">
           {nav.topLinks.map((link) => (

@@ -15,6 +15,8 @@ export type NavbarData = {
   siteTitle: string;
   faviconUrl: string;
   searchPlaceholder: string;
+  showMarquee: boolean;
+  marqueeText: string;
   topLinks: NavTopLink[];
   quickLinks: NavQuickLink[];
 };
@@ -235,6 +237,9 @@ export const defaultFrontendData: FrontendData = {
     siteTitle: "Modern Electronics",
     faviconUrl: "/favicon.ico",
     searchPlaceholder: "Search here...",
+    showMarquee: true,
+    marqueeText:
+      "HOT SALE 🔥 | MODERN ELECTRONICS LTD Trusted Electronics Experts Since 1998! Get quality electronics, appliances, accessories, and reliable tech solutions from Modern Electronics Ltd. Affordable Prices • Genuine Products • Trusted Service • Visit us today and upgrade your lifestyle with modern technology.",
     topLinks: [
       { label: "Home", href: "/", icon: "home" },
       { label: "About Us", href: "/about", icon: "info" },
