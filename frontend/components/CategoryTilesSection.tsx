@@ -126,7 +126,7 @@ export default function CategoryTilesSection({
         if (topSparePartsTiles.length === 0) return card;
         return {
           ...card,
-          title: "Top categories in Spare parts",
+          title: "Spare parts and Components",
           tiles: topSparePartsTiles,
           cta: {
             label: "Shop Spare parts",
@@ -169,9 +169,11 @@ export default function CategoryTilesSection({
               key={idx}
               className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm"
             >
-              <h3 className="text-[20px] font-extrabold leading-snug text-gray-900">
-                {card.title}
-              </h3>
+              <Link href={card.cta.href} className="group/title block">
+                <h3 className="text-[20px] font-extrabold leading-snug text-gray-900 group-hover/title:text-[#0b63ce]">
+                  {card.title}
+                </h3>
+              </Link>
 
               {card.tiles.length > 0 ? (
                 <div className="mt-4 grid grid-cols-2 gap-4">
@@ -186,7 +188,7 @@ export default function CategoryTilesSection({
                         <SafeImage
                           src={t.image}
                           alt={t.label}
-                          className="absolute inset-0 h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.04]"
+                          className="absolute inset-0 h-full w-full object-contain transition-transform duration-300 group-hover:scale-[1.04]"
                         />
                       </div>
                       <div className="mt-2 text-[13px] text-gray-800 group-hover:text-[#ff6a00]">
