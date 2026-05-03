@@ -268,7 +268,7 @@ export const defaultFrontendData: FrontendData = {
       {
         // Mockup tiles removed — this card is populated at runtime from the
         // live Spare Parts category (see CategoryTilesSection + getSparePartsCategoryFeature).
-        title: "Top categories in TV spare parts",
+        title: "Spare parts and Components",
         tiles: [],
         cta: { label: "Shop TV parts", href: "/tv-parts" },
       },
