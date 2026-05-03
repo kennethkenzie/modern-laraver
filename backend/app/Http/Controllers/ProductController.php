@@ -7,6 +7,7 @@ use App\Models\Product;
 use App\Models\ProductRelation;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class ProductController extends Controller
 {
@@ -239,55 +240,186 @@ class ProductController extends Controller
      */
     public function byCategory(string $slug): JsonResponse
     {
-        $category = Category::where('slug', $slug)
-            ->with(['parent', 'products' => function ($q) {
-                $q->where('is_published', true)
-                    ->with([
-                        'media'    => fn ($mq) => $mq->orderByDesc('is_primary')->orderBy('sort_order'),
-                        'variants' => fn ($vq) => $vq->where('is_active', true)->orderByDesc('is_default')->orderBy('sort_order'),
-                    ])
-                    ->orderByDesc('created_at');
-            }])
-            ->first();
+        $category = $this->resolveCategoryBySlug($slug);
+
+        if ($category) {
+            $category->load([
+                'parent',
+                'children' => function ($q) {
+                    $q->where('is_active', true)->orderBy('featured_sort_order')->orderBy('name');
+                },
+            ]);
+        }
 
         if (! $category) {
             return response()->json(['error' => 'Category not found.'], 404);
         }
 
-        $products = $category->products
-            ->map(function ($p) {
-                $variant  = $p->variants->first();
-                $media    = $p->media->first();
-                $price    = $variant ? (float) $variant->price : (float) ($p->sale_price ?? $p->list_price ?? 0);
-                $oldPrice = $variant?->compare_at_price ? (float) $variant->compare_at_price : (float) ($p->list_price ?? 0);
+        $mapProduct = function ($p) {
+            $variant  = $p->variants->first();
+            $media    = $p->media->first();
+            $price    = $variant ? (float) $variant->price : (float) ($p->sale_price ?? $p->list_price ?? 0);
+            $oldPrice = $variant?->compare_at_price ? (float) $variant->compare_at_price : (float) ($p->list_price ?? 0);
 
-                return [
-                    'id'         => $p->id,
-                    'name'       => $p->name,
-                    'shortDesc'  => $this->stripHtml($p->short_description ?? $p->description ?? ''),
-                    'image'      => $media?->url ?? '',
-                    'price'      => $price,
-                    'oldPrice'   => $oldPrice > $price ? $oldPrice : null,
-                    'rating'     => (float) $p->average_rating,
-                    'isFeatured' => (bool) $p->is_featured_home,
-                    'href'       => "/product/{$p->slug}",
-                ];
-            })
-            ->filter(fn ($p) => $p['price'] > 0)
+            return [
+                'id'         => $p->id,
+                'name'       => $p->name,
+                'shortDesc'  => $this->stripHtml($p->short_description ?? $p->description ?? ''),
+                'image'      => $media?->url ?? '',
+                'price'      => $price,
+                'oldPrice'   => $oldPrice > $price ? $oldPrice : null,
+                'rating'     => (float) $p->average_rating,
+                'isFeatured' => (bool) $p->is_featured_home,
+                'href'       => "/product/{$p->slug}",
+            ];
+        };
+
+        $directProducts = $this->productsForCategoryIds([$category->id])
+            ->toBase()
+            ->map($mapProduct)
+            ->filter(fn ($p) => !empty($p['image']))  // only require an image for tile display
             ->values();
 
+        $subCategories = $category->children->map(function ($child) use ($mapProduct) {
+            $products = $this->productsForCategoryIds($this->categoryTreeIds($child))
+                ->toBase()
+                ->map($mapProduct)
+                ->filter(fn ($p) => !empty($p['image']))  // only require an image for tile display
+                ->values();
+
+            return [
+                'id'       => $child->id,
+                'name'     => $child->name,
+                'slug'     => $child->slug,
+                'image'    => $child->image_url ?? '',
+                'products' => $products,
+            ];
+        })->filter(fn ($c) => count($c['products']) > 0)->values();
+
+        // Flat list of all products from this category and every descendant
+        // category, including subcategories and sub-subcategories.
+        $childProducts = $subCategories->flatMap(fn ($c) => $c['products']->toArray())->values();
+        $allProducts   = $directProducts->merge($childProducts)->values();
+
         return response()->json([
-            'categoryId'  => $category->id,
-            'slug'        => $category->slug,
-            'title'       => $category->name,
-            'description' => $category->description ?? "Browse our collection of {$category->name}.",
-            'image'       => $category->image_url ?? '',
-            'rootCategory'=> $category->parent?->name ?? '',
-            'products'    => $products,
+            'categoryId'    => $category->id,
+            'slug'          => $category->slug,
+            'title'         => $category->name,
+            'description'   => $category->description ?? "Browse our collection of {$category->name}.",
+            'image'         => $category->image_url ?? '',
+            'rootCategory'  => $category->parent?->name ?? '',
+            'products'      => $allProducts,
+            'subCategories' => $subCategories,
         ]);
     }
 
     // ─── helpers ──────────────────────────────────────────────
+
+    private function resolveCategoryBySlug(string $slug): ?Category
+    {
+        $candidates = $this->categorySlugCandidates($slug);
+
+        $category = Category::whereIn('slug', $candidates)->first();
+        if ($category) {
+            return $category;
+        }
+
+        $categories = Category::where('is_active', true)->get();
+        foreach ($categories as $candidate) {
+            if (in_array(Str::slug($candidate->name), $candidates, true)) {
+                return $candidate;
+            }
+        }
+
+        $normalized = Str::slug($slug);
+        if (str_contains($normalized, 'appliance')) {
+            return Category::where('is_active', true)
+                ->where(function ($q) {
+                    $q->where('slug', 'like', '%appliance%')
+                        ->orWhere('name', 'like', '%appliance%');
+                })
+                ->orderByRaw('parent_id is not null')
+                ->orderBy('featured_sort_order')
+                ->orderBy('name')
+                ->first();
+        }
+
+        return null;
+    }
+
+    private function categorySlugCandidates(string $slug): array
+    {
+        $normalized = Str::slug($slug);
+        $candidates = array_filter([$slug, $normalized]);
+        $segments = array_values(array_filter(explode('-', $normalized)));
+        $lastSegment = array_pop($segments);
+
+        if ($lastSegment) {
+            foreach ([Str::singular($lastSegment), Str::plural($lastSegment)] as $variant) {
+                $variantSegments = $segments;
+                $variantSegments[] = $variant;
+                $candidate = implode('-', $variantSegments);
+
+                if ($candidate) {
+                    $candidates[] = $candidate;
+                }
+            }
+        }
+
+        if (str_contains($normalized, 'appliance')) {
+            $candidates = array_merge($candidates, [
+                'large-appliance',
+                'large-appliances',
+                'home-appliance',
+                'home-appliances',
+                'appliance',
+                'appliances',
+            ]);
+        }
+
+        return array_values(array_unique(array_filter($candidates)));
+    }
+
+    private function productsForCategoryIds(array $categoryIds)
+    {
+        $ids = array_values(array_unique(array_filter($categoryIds)));
+
+        if (empty($ids)) {
+            return collect();
+        }
+
+        return Product::whereIn('category_id', $ids)
+            ->where('is_published', true)
+            ->with([
+                'media'    => fn ($mq) => $mq->orderByDesc('is_primary')->orderBy('sort_order'),
+                'variants' => fn ($vq) => $vq->where('is_active', true)->orderByDesc('is_default')->orderBy('sort_order'),
+            ])
+            ->orderByDesc('created_at')
+            ->get();
+    }
+
+    private function categoryTreeIds(Category $category): array
+    {
+        $ids = [$category->id];
+        $parentIds = [$category->id];
+
+        while (! empty($parentIds)) {
+            $children = Category::whereIn('parent_id', $parentIds)
+                ->where('is_active', true)
+                ->pluck('id')
+                ->all();
+
+            $children = array_values(array_diff($children, $ids));
+            if (empty($children)) {
+                break;
+            }
+
+            $ids = array_merge($ids, $children);
+            $parentIds = $children;
+        }
+
+        return $ids;
+    }
 
     private function effectivePrice(Product $p): float
     {

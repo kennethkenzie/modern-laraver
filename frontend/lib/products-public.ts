@@ -162,21 +162,145 @@ export async function getOfferTargetProductsBySlugs(
   }
 }
 
+export type CategorySubCategory = {
+  id: string;
+  name: string;
+  slug: string;
+  image: string;
+  products: CategoryListingProduct[];
+};
+
+type CategoryListingData = {
+  categoryId: string;
+  slug: string;
+  title: string;
+  description: string;
+  image: string;
+  rootCategory: string;
+  products: CategoryListingProduct[];
+  subCategories?: CategorySubCategory[];
+};
+
+type FrontendCategory = {
+  title: string;
+  slug: string;
+  rootCategory?: string;
+  isActive: boolean;
+};
+
 export async function getProductsByCategorySlug(slug: string) {
+  const data = await fetchCategoryListing(slug);
+  if (data) return data;
+
+  const alias = await resolveCategorySlugAlias(slug);
+  if (alias && alias !== slug) {
+    return fetchCategoryListing(alias);
+  }
+
+  return null;
+}
+
+async function fetchCategoryListing(slug: string): Promise<CategoryListingData | null> {
   try {
-    const data = await apiFetch<{
-      categoryId: string;
-      slug: string;
-      title: string;
-      description: string;
-      image: string;
-      rootCategory: string;
-      products: CategoryListingProduct[];
-    }>(`/categories/${encodeURIComponent(slug)}/products`);
+    const data = await apiFetch<CategoryListingData>(`/categories/${encodeURIComponent(slug)}/products`);
     return data;
   } catch {
     return null;
   }
+}
+
+async function resolveCategorySlugAlias(slug: string): Promise<string | null> {
+  const categories = await getFrontendCategories();
+  const candidates = categorySlugCandidates(slug);
+  const normalized = normalizeCategoryText(slug);
+  const activeCategories = categories.filter((category) => category.isActive !== false && category.slug);
+
+  const exactMatch = activeCategories.find((category) =>
+    candidates.includes(category.slug) ||
+    candidates.includes(slugify(category.title))
+  );
+
+  if (exactMatch) return exactMatch.slug;
+
+  if (normalized.includes("appliance")) {
+    const applianceMatch = activeCategories.find((category) => {
+      const haystack = normalizeCategoryText([
+        category.title,
+        category.slug,
+        category.rootCategory ?? "",
+      ].join(" "));
+
+      return haystack.includes("appliance") ||
+        haystack.includes("home good") ||
+        haystack.includes("household") ||
+        haystack.includes("kitchen");
+    });
+
+    if (applianceMatch) return applianceMatch.slug;
+
+    for (const alias of ["home-appliances", "home-appliance", "appliances", "appliance"]) {
+      const data = await fetchCategoryListing(alias);
+      if (data) return data.slug || alias;
+    }
+  }
+
+  return null;
+}
+
+async function getFrontendCategories(): Promise<FrontendCategory[]> {
+  try {
+    const data = await apiFetch<{
+      categories?: FrontendCategory[];
+      data?: { categories?: FrontendCategory[] };
+    }>(`/frontend-data`);
+
+    return data.data?.categories ?? data.categories ?? [];
+  } catch {
+    return [];
+  }
+}
+
+function categorySlugCandidates(slug: string): string[] {
+  const normalized = slugify(slug);
+  const candidates = [slug, normalized];
+  const segments = normalized.split("-").filter(Boolean);
+  const lastSegment = segments.pop();
+
+  if (lastSegment) {
+    const roots = segments.join("-");
+    const singular = lastSegment.endsWith("s") ? lastSegment.slice(0, -1) : lastSegment;
+    const plural = singular.endsWith("s") ? singular : `${singular}s`;
+
+    for (const suffix of [singular, plural]) {
+      candidates.push(roots ? `${roots}-${suffix}` : suffix);
+    }
+  }
+
+  if (normalized.includes("appliance")) {
+    candidates.push(
+      "large-appliance",
+      "large-appliances",
+      "home-appliance",
+      "home-appliances",
+      "appliance",
+      "appliances"
+    );
+  }
+
+  return Array.from(new Set(candidates.filter(Boolean)));
+}
+
+function slugify(value: string) {
+  return value
+    .toLowerCase()
+    .trim()
+    .replace(/&/g, " and ")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+function normalizeCategoryText(value: string) {
+  return value.toLowerCase().replace(/[-_]+/g, " ").replace(/\s+/g, " ").trim();
 }
 
 export async function getSearchSuggestionsByCategory(
@@ -239,18 +363,11 @@ async function findFirstActiveCategoryBy(
   }) => boolean)[]
 ): Promise<{ title: string; slug: string } | null> {
   try {
-    const data = await apiFetch<{
-      categories: {
-        title: string;
-        slug: string;
-        rootCategory?: string;
-        isActive: boolean;
-      }[];
-    }>(`/frontend-data`);
+    const list = await getFrontendCategories();
 
-    const list = (data.categories ?? []).filter((c) => c.isActive !== false && c.slug);
+    const activeCategories = list.filter((c) => c.isActive !== false && c.slug);
     for (const predicate of predicates) {
-      const hit = list.find(predicate);
+      const hit = activeCategories.find(predicate);
       if (hit) return { title: hit.title, slug: hit.slug };
     }
   } catch {
@@ -299,10 +416,55 @@ export async function getSparePartsCategoryFeature(): Promise<FeatureCategory | 
 }
 
 export async function getApplianceCategoryFeature(): Promise<FeatureCategory | null> {
+  // Try the canonical slug directly first, then fall back to pattern matching.
+  const directSlugs = ["home-appliances", "home-appliance", "appliances", "appliance"];
+  for (const slug of directSlugs) {
+    const data = await getProductsByCategorySlug(slug);
+    if (data?.products?.length) {
+      return {
+        title: data.title || "Home Appliances",
+        slug: data.slug || slug,
+        products: data.products.map((p) => ({
+          id: p.id,
+          name: p.name,
+          image: p.image,
+          href: p.href,
+          price: p.price,
+        })),
+      };
+    }
+  }
+
+  // Fallback: scan all active categories for appliance-related names.
   const lc = (s?: string) => (s ?? "").toLowerCase();
-  return loadCategoryFeatureByCandidates([
+  const patternMatch = await loadCategoryFeatureByCandidates([
     (c) => /appliance/i.test(c.title) || /appliance/.test(lc(c.slug)),
     (c) => lc(c.rootCategory).includes("appliance"),
     (c) => /home/i.test(c.title) && /good|ware|appliance/i.test(c.title),
+    (c) => /household|kitchen|refrigerat|washing|microwave|freezer|cooker|blender|iron|fan/i.test(c.title),
   ]);
+  if (patternMatch) return patternMatch;
+
+  // Last resort: try every active category and return the first one that has
+  // products with images — so the tile card always shows something.
+  try {
+    const allCategories = await getFrontendCategories();
+    const active = allCategories.filter((c) => c.isActive !== false && c.slug);
+    for (const cat of active) {
+      const data = await getProductsByCategorySlug(cat.slug);
+      if (data?.products && data.products.filter((p) => p.image).length > 0) {
+        return {
+          title: data.title || cat.title,
+          slug: data.slug || cat.slug,
+          products: data.products
+            .filter((p) => p.image)
+            .map((p) => ({ id: p.id, name: p.name, image: p.image, href: p.href, price: p.price })),
+        };
+      }
+    }
+  } catch {
+    /* ignore */
+  }
+
+  return null;
 }
