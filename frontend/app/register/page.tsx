@@ -1,10 +1,5 @@
-import { Suspense } from "react";
-import AuthRouteOverlayEntry from "@/components/AuthRouteOverlayEntry";
+import { redirect } from "next/navigation";
 
 export default function RegisterPage() {
-  return (
-    <Suspense>
-      <AuthRouteOverlayEntry mode="register" />
-    </Suspense>
-  );
+  redirect("/login");
 }

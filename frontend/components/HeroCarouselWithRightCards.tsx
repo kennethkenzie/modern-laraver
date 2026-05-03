@@ -69,11 +69,8 @@ export default function HeroCarouselWithRightCards({ initialData }: { initialDat
                     <div className="relative h-full min-h-[360px]">
                       <SafeImage
                         src={s.image}
-                        alt={s.title || "Slide"}
-                        fill
-                        priority={si === 0}
-                        sizes="(max-width: 1024px) 100vw, 66vw"
-                        className="object-cover object-center"
+                        alt="Carousel background"
+                        className="absolute inset-0 h-full w-full object-cover"
                       />
                       <div className="absolute inset-0 bg-black/25" />
 
@@ -181,9 +178,6 @@ export default function HeroCarouselWithRightCards({ initialData }: { initialDat
                             <SafeImage
                               src={offer.targetImage}
                               alt={offer.targetTitle || offer.title}
-                              width={200}
-                              height={155}
-                              sizes="200px"
                               className="h-[130px] w-full max-w-[200px] object-contain transition-transform duration-300 group-hover:scale-[1.04] sm:h-[155px]"
                             />
                           </div>
@@ -286,9 +280,6 @@ export default function HeroCarouselWithRightCards({ initialData }: { initialDat
                         <SafeImage
                           src={c.image}
                           alt={c.title}
-                          width={200}
-                          height={120}
-                          sizes="200px"
                           className="h-[120px] w-full max-w-[200px] rounded-[14px] object-cover shadow-sm transition-transform duration-300 group-hover:scale-[1.03] sm:h-[110px] sm:w-[150px]"
                         />
                       </div>

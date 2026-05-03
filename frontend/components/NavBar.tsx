@@ -267,6 +267,9 @@ export default function NavBar({
                 <SafeImage
                   src={nav.logoUrl}
                   alt={nav.logoAlt || "Store logo"}
+                  width={160}
+                  height={64}
+                  priority
                   className="h-14 w-auto object-contain sm:h-16"
                 />
               ) : (
@@ -327,6 +330,8 @@ export default function NavBar({
                                     <SafeImage
                                       src={item.image}
                                       alt={item.title}
+                                      width={95}
+                                      height={64}
                                       className="max-h-[64px] max-w-[95px] object-contain"
                                     />
                                   </div>
@@ -529,7 +534,7 @@ export default function NavBar({
                           >
                             {cat.thumbnail ? (
                               <div className="flex h-6 w-6 items-center justify-center">
-                                <SafeImage src={cat.thumbnail} alt="" className="h-5 w-5 object-contain" />
+                                <SafeImage src={cat.thumbnail} alt="" width={20} height={20} className="h-5 w-5 object-contain" />
                               </div>
                             ) : (
                               <Menu size={14} className="text-gray-400" />
@@ -561,7 +566,7 @@ export default function NavBar({
                           <div className="px-4">
                             <div className="mb-3 flex items-center gap-2 border-b border-gray-200 pb-2">
                               {cat.thumbnail && (
-                                <SafeImage src={cat.thumbnail} alt="" className="h-6 w-6 object-contain" />
+                                <SafeImage src={cat.thumbnail} alt="" width={24} height={24} className="h-6 w-6 object-contain" />
                               )}
                               <Link 
                                 href={`/category/${cat.slug}`} 

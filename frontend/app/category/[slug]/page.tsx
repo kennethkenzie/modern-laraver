@@ -6,7 +6,7 @@ import NavBar from "@/components/NavBar";
 import SafeImage from "@/components/SafeImage";
 import { readFrontendDataFromPrisma } from "@/lib/site-settings";
 import { mergeFrontendData } from "@/lib/frontend-data-merge";
-import { getProductsByCategorySlug, getSearchSuggestionsByCategory } from "@/lib/products-public";
+import { getProductsByCategorySlug, getSearchSuggestionsByCategory, type CategorySubCategory } from "@/lib/products-public";
 import {
   SITE_NAME,
   SITE_URL,
@@ -17,6 +17,50 @@ import {
 
 function formatUGX(value: number) {
   return `UGX ${value.toLocaleString("en-US")}`;
+}
+
+function ProductCard({ product }: { product: { id: string; name: string; image: string; href: string; shortDesc: string; price: number; oldPrice?: number | null; rating?: number } }) {
+  return (
+    <article className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
+      <Link href={product.href} className="block bg-gray-50">
+        <SafeImage
+          src={product.image}
+          alt={product.name}
+          width={400}
+          height={240}
+          sizes="(max-width:640px) 100vw, (max-width:1024px) 50vw, 33vw"
+          className="h-[240px] w-full object-cover"
+        />
+      </Link>
+      <div className="p-5">
+        <Link
+          href={product.href}
+          className="line-clamp-2 text-[17px] font-semibold text-gray-900 hover:text-[#0b63ce]"
+        >
+          {product.name}
+        </Link>
+        <p className="mt-2 line-clamp-3 text-[14px] leading-6 text-gray-600">
+          {product.shortDesc}
+        </p>
+        <div className="mt-4 flex items-center gap-2 text-[#f59e0b]">
+          <Star size={16} className="fill-current" />
+          <span className="text-[14px] font-medium text-gray-700">
+            {(product.rating ?? 4).toFixed(1)}
+          </span>
+        </div>
+        <div className="mt-4 flex items-center gap-3">
+          <div className="text-[23px] font-bold text-[#16a34a]">
+            {formatUGX(product.price)}
+          </div>
+          {product.oldPrice ? (
+            <div className="text-[14px] text-gray-400 line-through">
+              {formatUGX(product.oldPrice)}
+            </div>
+          ) : null}
+        </div>
+      </div>
+    </article>
+  );
 }
 
 export async function generateMetadata({
@@ -158,6 +202,10 @@ export default async function CategoryPage({
                 <SafeImage
                   src={categoryData.image}
                   alt={categoryData.title}
+                  width={800}
+                  height={260}
+                  priority
+                  sizes="(max-width:768px) 100vw, 50vw"
                   className="h-[260px] w-full object-cover"
                 />
               </div>
@@ -175,52 +223,56 @@ export default async function CategoryPage({
             </div>
           </div>
 
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {categoryData.products.map((product) => (
-              <article
-                key={product.id}
-                className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm"
-              >
-                <Link href={product.href} className="block bg-gray-50">
-                  <SafeImage
-                    src={product.image}
-                    alt={product.name}
-                    className="h-[240px] w-full object-cover"
-                  />
-                </Link>
-
-                <div className="p-5">
-                  <Link
-                    href={product.href}
-                    className="line-clamp-2 text-[17px] font-semibold text-gray-900 hover:text-[#0b63ce]"
-                  >
-                    {product.name}
-                  </Link>
-                  <p className="mt-2 line-clamp-3 text-[14px] leading-6 text-gray-600">
-                    {product.shortDesc}
-                  </p>
-
-                  <div className="mt-4 flex items-center gap-2 text-[#f59e0b]">
-                    <Star size={16} className="fill-current" />
-                    <span className="text-[14px] font-medium text-gray-700">
-                      {(product.rating ?? 4).toFixed(1)}
-                    </span>
+          {categoryData.subCategories && categoryData.subCategories.length > 0 ? (
+            <div className="space-y-12">
+              {categoryData.subCategories.map((sub: CategorySubCategory) => (
+                <div key={sub.id}>
+                  <div className="mb-4 flex items-center justify-between">
+                    <h3 className="text-[20px] font-bold text-gray-900">{sub.name}</h3>
+                    <Link
+                      href={`/category/${sub.slug}`}
+                      className="text-[13px] font-semibold text-[#0b63ce] hover:underline"
+                    >
+                      See all in {sub.name}
+                    </Link>
                   </div>
-
-                  <div className="mt-4 flex items-center gap-3">
-                    <div className="text-[23px] font-bold text-[#16a34a]">
-                      {formatUGX(product.price)}
-                    </div>
-                    {product.oldPrice ? (
-                      <div className="text-[14px] text-gray-400 line-through">
-                        {formatUGX(product.oldPrice)}
-                      </div>
-                    ) : null}
+                  <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                    {sub.products.map((product) => (
+                      <ProductCard key={product.id} product={product} />
+                    ))}
                   </div>
                 </div>
-              </article>
-            ))}
-          </div>
+              ))}
+              {categoryData.products.filter(
+                (p) => !(categoryData.subCategories ?? []).some((s: CategorySubCategory) =>
+                  s.products.some((sp) => sp.id === p.id)
+                )
+              ).length > 0 && (
+                <div>
+                  <div className="mb-4">
+                    <h3 className="text-[20px] font-bold text-gray-900">Other {categoryData.title}</h3>
+                  </div>
+                  <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                    {categoryData.products
+                      .filter(
+                        (p) => !(categoryData.subCategories ?? []).some((s: CategorySubCategory) =>
+                          s.products.some((sp) => sp.id === p.id)
+                        )
+                      )
+                      .map((product) => (
+                        <ProductCard key={product.id} product={product} />
+                      ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {categoryData.products.map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </div>
+          )}
         </section>
       </main>
     </>

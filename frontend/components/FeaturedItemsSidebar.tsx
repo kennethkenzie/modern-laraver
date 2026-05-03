@@ -59,6 +59,9 @@ function FeaturedProductCard({ product }: { product: FeaturedSidebarProduct }) {
         <SafeImage
           src={product.image}
           alt={product.title}
+          width={96}
+          height={96}
+          sizes="96px"
           className="max-h-[96px] max-w-[96px] object-contain"
         />
       </div>

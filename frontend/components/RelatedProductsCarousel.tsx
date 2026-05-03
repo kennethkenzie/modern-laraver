@@ -128,6 +128,9 @@ export default function RelatedProductsCarousel({
                         <SafeImage
                           src={product.image}
                           alt={product.title}
+                          width={185}
+                          height={170}
+                          sizes="185px"
                           className="max-h-full w-auto max-w-full object-contain transition-transform duration-300 group-hover:scale-[1.03]"
                         />
                       </div>

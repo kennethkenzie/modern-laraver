@@ -13,10 +13,7 @@ export async function readFrontendDataFromPrisma(): Promise<FrontendData | null>
       headers: {
         Accept: "application/json",
       },
-      // ISR: revalidate every 5 minutes instead of no-store, so static routes
-      // (/_not-found, /about, etc.) can be pre-rendered at build time and
-      // refreshed incrementally — avoids DYNAMIC_SERVER_USAGE errors.
-      next: { revalidate: 300 },
+      cache: "no-store",
     });
 
     if (!response.ok) {

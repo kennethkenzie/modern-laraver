@@ -42,7 +42,7 @@ export async function fetchFrontendData(): Promise<FrontendData> {
 
     const response = await fetch(endpoint, {
       method: "GET",
-      next: { revalidate: 300 },
+      cache: "no-store",
     });
 
     if (!response.ok) {

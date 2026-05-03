@@ -69,6 +69,9 @@ export default function CartPage() {
                       <SafeImage
                         src={item.image}
                         alt={item.name}
+                        width={100}
+                        height={100}
+                        sizes="100px"
                         className="h-[100px] w-[100px] rounded-md object-cover"
                       />
                     </Link>

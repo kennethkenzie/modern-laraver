@@ -144,6 +144,9 @@ export default function ModernElectronicsFooter() {
                     <SafeImage
                       src={gateway.logo}
                       alt={gateway.name}
+                      width={72}
+                      height={24}
+                      sizes="72px"
                       className="h-6 w-auto max-w-[72px] object-contain"
                     />
                   ) : null}

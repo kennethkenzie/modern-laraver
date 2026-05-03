@@ -247,6 +247,8 @@ export default function ProductDetailsClient({
                     <SafeImage
                       src={item.image}
                       alt={item.alt}
+                      width={72}
+                      height={72}
                       className="h-full w-full object-cover"
                     />
                     {item.isVideo ? (
@@ -344,6 +346,10 @@ export default function ProductDetailsClient({
                     <SafeImage
                       src={selectedImageUrl}
                       alt={selectedImage?.alt || product.name}
+                      width={600}
+                      height={600}
+                      priority
+                      sizes="(max-width:768px) 100vw, 50vw"
                       className={`max-h-[500px] w-auto max-w-full object-contain transition duration-200 ${
                         zoomPosition ? "opacity-0" : "opacity-100"
                       }`}
@@ -621,6 +627,8 @@ export default function ProductDetailsClient({
                   <SafeImage
                     src={relatedPreview.image}
                     alt={relatedPreview.title}
+                    width={96}
+                    height={96}
                     className="h-24 w-24 rounded-lg object-cover"
                   />
                   <div>

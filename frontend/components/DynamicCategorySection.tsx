@@ -47,6 +47,9 @@ export default function DynamicCategorySection() {
                                     <SafeImage
                                         src={cat.thumbnail}
                                         alt={cat.title}
+                                        width={64}
+                                        height={64}
+                                        sizes="64px"
                                         className="h-full w-full object-contain transition-transform duration-300 group-hover:scale-110"
                                     />
                                 ) : (
