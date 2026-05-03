@@ -227,7 +227,7 @@ function ProductCard({ product: p }: { product: ProductFeedItem }) {
         p.isFresh ? "latest-product-enter" : "",
       ].join(" ")}
     >
-      <div className="relative h-[260px] overflow-hidden rounded-t-[22px] bg-[linear-gradient(180deg,#f8fafc_0%,#eef2f7_100%)]">
+      <div className="relative overflow-hidden rounded-t-[22px]">
         <WishlistButton
           item={{
             id: p.id,
@@ -236,15 +236,15 @@ function ProductCard({ product: p }: { product: ProductFeedItem }) {
             image: toCloudinaryUrl(p.image),
             href: p.href,
           }}
-          className="absolute right-4 top-4 z-10 inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/95 text-gray-700 shadow-sm transition hover:bg-white"
+          className="absolute right-3 top-3 z-10 inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/95 text-gray-700 shadow-sm transition hover:bg-white"
         />
 
-        <Link href={p.href} aria-label={p.name}>
+        <Link href={p.href} aria-label={p.name} className="block">
           <SafeImage
             src={p.image}
             alt={p.name}
             loading="lazy"
-            className="h-full w-full object-contain transition-transform duration-500 group-hover:scale-[1.04]"
+            className="aspect-square w-full object-contain transition-transform duration-500 group-hover:scale-[1.04]"
           />
         </Link>
       </div>
@@ -295,7 +295,7 @@ function ProductCard({ product: p }: { product: ProductFeedItem }) {
 function ProductSkeleton() {
   return (
     <div className="overflow-hidden rounded-[22px] border border-gray-200/80 bg-white shadow-[0_16px_40px_rgba(15,23,42,0.05)]">
-      <div className="h-[260px] animate-pulse bg-[linear-gradient(90deg,#f3f4f6_0%,#e5e7eb_50%,#f3f4f6_100%)]" />
+      <div className="aspect-square w-full animate-pulse bg-[linear-gradient(90deg,#f3f4f6_0%,#e5e7eb_50%,#f3f4f6_100%)]" />
       <div className="space-y-4 p-5">
         <div className="h-5 w-3/4 animate-pulse rounded-full bg-gray-200" />
         <div className="h-4 w-full animate-pulse rounded-full bg-gray-100" />
