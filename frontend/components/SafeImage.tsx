@@ -2,21 +2,20 @@
 
 import NextImage from "next/image";
 import { useState } from "react";
-import { getImageFallbackUrl } from "@/lib/cloudinary";
+import { toCloudinaryUrl } from "@/lib/cloudinary";
 
 type SafeImageProps = {
   src: string;
   alt: string;
   className?: string;
-  /** Pass true when the parent is position:relative/absolute with defined size */
+  /** Use when the parent has position:relative/absolute with defined dimensions */
   fill?: boolean;
-  /** Hint the browser this image is above the fold — skips lazy loading */
+  /** Above-the-fold images — skips lazy loading */
   priority?: boolean;
-  /** Pass responsive sizes string for correct srcset selection */
+  /** Responsive sizes hint for correct srcset selection */
   sizes?: string;
   width?: number;
   height?: number;
-  loading?: "lazy" | "eager";
   quality?: number;
 };
 
@@ -29,13 +28,18 @@ export default function SafeImage({
   sizes,
   width,
   height,
-  quality = 80,
+  quality = 82,
 }: SafeImageProps) {
-  const [imgSrc, setImgSrc] = useState(src || "/placeholder.png");
+  const resolved = toCloudinaryUrl(src);
+  const [imgSrc, setImgSrc] = useState(resolved);
+  const [failed, setFailed] = useState(false);
 
-  const handleError = () => {
-    if (src) setImgSrc(getImageFallbackUrl(src));
-  };
+  // Don't render anything if the URL is empty or the image failed to load
+  if (!imgSrc || failed) {
+    return <div className={className} aria-hidden="true" />;
+  }
+
+  const handleError = () => setFailed(true);
 
   if (fill) {
     return (
