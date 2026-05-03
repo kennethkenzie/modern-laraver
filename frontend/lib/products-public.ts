@@ -496,26 +496,8 @@ export async function getSparePartsCategoryFeature(): Promise<FeatureCategory | 
   );
   if (adminMatch) return adminMatch;
 
-  // 4. Last resort: return the first active category that has products with images.
-  try {
-    const allCategories = await getFrontendCategories();
-    const active = allCategories.filter((c) => c.isActive !== false && c.slug);
-    for (const cat of active) {
-      const data = await getProductsByCategorySlug(cat.slug);
-      if (data?.products && data.products.filter((p) => p.image).length > 0) {
-        return {
-          title: data.title || cat.title,
-          slug: data.slug || cat.slug,
-          products: data.products
-            .filter((p) => p.image)
-            .map((p) => ({ id: p.id, name: p.name, image: p.image, href: p.href, price: p.price })),
-        };
-      }
-    }
-  } catch {
-    /* ignore */
-  }
-
+  // No spare-parts category found — return null so the card shows empty state
+  // rather than showing products from a completely unrelated category.
   return null;
 }
 
