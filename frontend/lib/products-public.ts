@@ -188,21 +188,22 @@ type FrontendCategory = {
   isActive: boolean;
 };
 
-export async function getProductsByCategorySlug(slug: string) {
-  const data = await fetchCategoryListing(slug);
+export async function getProductsByCategorySlug(slug: string, tiles = false) {
+  const data = await fetchCategoryListing(slug, tiles);
   if (data) return data;
 
   const alias = await resolveCategorySlugAlias(slug);
   if (alias && alias !== slug) {
-    return fetchCategoryListing(alias);
+    return fetchCategoryListing(alias, tiles);
   }
 
   return null;
 }
 
-async function fetchCategoryListing(slug: string): Promise<CategoryListingData | null> {
+async function fetchCategoryListing(slug: string, tiles = false): Promise<CategoryListingData | null> {
   try {
-    const data = await apiFetch<CategoryListingData>(`/categories/${encodeURIComponent(slug)}/products`);
+    const qs = tiles ? "?tiles=1" : "";
+    const data = await apiFetch<CategoryListingData>(`/categories/${encodeURIComponent(slug)}/products${qs}`);
     return data;
   } catch {
     return null;
@@ -387,7 +388,7 @@ async function loadCategoryFeatureByCandidates(
   const match = await findFirstActiveCategoryBy(predicates);
   if (!match) return null;
 
-  const data = await getProductsByCategorySlug(match.slug);
+  const data = await getProductsByCategorySlug(match.slug, true);
   if (!data || !data.products?.length) return null;
 
   return {
@@ -460,13 +461,13 @@ async function getProductsFromAdminByCategoryMatch(
 }
 
 export async function getSparePartsCategoryFeature(): Promise<FeatureCategory | null> {
-  // 1. Try canonical slugs directly first.
+  // 1. Try canonical slugs directly — pass tiles=true to bypass price filter.
   const directSlugs = [
     "spare-parts", "tv-spare-parts", "tv-parts", "spare-parts-components",
     "components", "spare", "parts",
   ];
   for (const slug of directSlugs) {
-    const data = await getProductsByCategorySlug(slug);
+    const data = await getProductsByCategorySlug(slug, true);
     if (data?.products && data.products.filter((p) => p.image).length > 0) {
       return {
         title: data.title || "Spare parts and Components",
@@ -505,7 +506,7 @@ export async function getApplianceCategoryFeature(): Promise<FeatureCategory | n
   // Try the canonical slug directly first, then fall back to pattern matching.
   const directSlugs = ["home-appliances", "home-appliance", "appliances", "appliance"];
   for (const slug of directSlugs) {
-    const data = await getProductsByCategorySlug(slug);
+    const data = await getProductsByCategorySlug(slug, true);
     if (data?.products?.length) {
       return {
         title: data.title || "Home Appliances",

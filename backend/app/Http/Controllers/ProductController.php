@@ -238,8 +238,12 @@ class ProductController extends Controller
     /**
      * GET /api/categories/{slug}/products
      */
-    public function byCategory(string $slug): JsonResponse
+    public function byCategory(Request $request, string $slug): JsonResponse
     {
+        // ?tiles=1 — used by the home-page tile cards; skips price filter so
+        // products without variants still appear as long as they have an image.
+        $tilesMode = (bool) $request->query('tiles', false);
+
         $category = $this->resolveCategoryBySlug($slug);
 
         if ($category) {
@@ -277,14 +281,14 @@ class ProductController extends Controller
         $directProducts = $this->productsForCategoryIds([$category->id])
             ->toBase()
             ->map($mapProduct)
-            ->filter(fn ($p) => !empty($p['image']))  // only require an image for tile display
+            ->filter(fn ($p) => $tilesMode ? !empty($p['image']) : $p['price'] > 0)
             ->values();
 
         $subCategories = $category->children->map(function ($child) use ($mapProduct) {
             $products = $this->productsForCategoryIds($this->categoryTreeIds($child))
                 ->toBase()
                 ->map($mapProduct)
-                ->filter(fn ($p) => !empty($p['image']))  // only require an image for tile display
+                ->filter(fn ($p) => $tilesMode ? !empty($p['image']) : $p['price'] > 0)
                 ->values();
 
             return [
