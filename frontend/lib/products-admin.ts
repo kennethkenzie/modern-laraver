@@ -4,10 +4,6 @@
 import { apiFetch, ADMIN_API_TOKEN } from "@/lib/api";
 import type { LatestProduct } from "@/lib/frontend-data";
 
-const adminHeaders = ADMIN_API_TOKEN
-  ? { Authorization: `Bearer ${ADMIN_API_TOKEN}` }
-  : {};
-
 // ─── admin product list ───────────────────────────────────────
 
 export type AdminProduct = {

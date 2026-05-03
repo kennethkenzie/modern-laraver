@@ -6,11 +6,11 @@
  */
 
 import { normalizePhoneNumber } from "@/lib/phone";
+import { TOKEN_KEY } from "@/lib/api";
 
 const AUTH_API_BASE = "/api/auth";
 
 const SESSION_KEY = "modern_session_v1";
-const TOKEN_KEY   = "admin_token";
 
 export type CustomerProfile = {
   id?: string;
@@ -21,6 +21,13 @@ export type CustomerProfile = {
   city?: string;
   country?: string;
   role?: string;
+};
+
+type AuthResponse = {
+  ok?: boolean;
+  token?: string;
+  profile?: CustomerProfile;
+  error?: string;
 };
 
 // ─── token helpers ──────────────────────────────────────────
@@ -51,6 +58,16 @@ function setSession(profile: CustomerProfile) {
   if (!isBrowser()) return;
   localStorage.setItem(SESSION_KEY, JSON.stringify(profile));
   window.dispatchEvent(new Event("auth:updated"));
+}
+
+function normalizeProfile(profile: CustomerProfile | undefined): CustomerProfile {
+  return {
+    id: profile?.id,
+    fullName: profile?.fullName ?? "",
+    email: profile?.email,
+    phone: profile?.phone,
+    role: profile?.role,
+  };
 }
 
 export function getCurrentUser(): CustomerProfile | null {
@@ -92,8 +109,8 @@ export async function login(emailOrPhone: string, password: string) {
     ? { email: value.toLowerCase(), password }
     : { phone: normalizePhoneNumber(value) || value, password };
 
-  const data = await apiPost<{ ok?: boolean; token?: string; profile?: CustomerProfile; error?: string }>(
-    "/auth/login",
+  const data = await apiPost<AuthResponse>(
+    "/login",
     payload
   );
 
@@ -102,85 +119,7 @@ export async function login(emailOrPhone: string, password: string) {
   }
 
   setToken(data.token!, false);
-  const profile: CustomerProfile = {
-    id:       (data.profile as any)?.id,
-    fullName: (data.profile as any)?.fullName ?? "",
-    email:    (data.profile as any)?.email,
-    phone:    (data.profile as any)?.phone,
-    role:     (data.profile as any)?.role,
-  };
-  setSession(profile);
-  return { ok: true as const, user: profile };
-}
-
-export async function register(input: CustomerProfile & { password: string }) {
-  const phone = normalizePhoneNumber(input.phone ?? "") || (input.phone ?? "").trim();
-
-  if (!phone) {
-    return { ok: false as const, error: "Phone number is required." };
-  }
-
-  const data = await apiPost<{ ok?: boolean; token?: string; profile?: CustomerProfile; error?: string }>(
-    "/auth/register",
-    {
-      full_name: input.fullName.trim(),
-      phone,
-      email:    input.email?.trim().toLowerCase() || undefined,
-      password: input.password,
-    }
-  );
-
-  if (data.error || !data.ok) {
-    return { ok: false as const, error: data.error ?? "Registration failed." };
-  }
-
-  setToken(data.token!, false);
-  const profile: CustomerProfile = {
-    id:       (data.profile as any)?.id,
-    fullName: (data.profile as any)?.fullName ?? "",
-    email:    (data.profile as any)?.email,
-    phone:    (data.profile as any)?.phone,
-    role:     (data.profile as any)?.role,
-  };
-  setSession(profile);
-  return { ok: true as const, user: profile };
-}
-
-export async function signInWithPhone(phone: string) {
-  // After OTP verification, try to find the account by phone (no password).
-  // Falls back to the localStorage-only approach if the account does not exist on the server.
-  const normalized = normalizePhoneNumber(phone) || phone.trim();
-  const current = getCurrentUser();
-  if (current?.phone === normalized) return { ok: true as const, user: current };
-  return { ok: false as const, error: "No account found for that phone number." };
-}
-
-export async function signInWithPhoneOrEmail(phone: string, email?: string) {
-  return signInWithPhone(phone);
-}
-
-export async function signUpWithPhone(fullName: string, phone: string, email: string) {
-  const normalized = normalizePhoneNumber(phone) || phone.trim();
-  if (!normalized) return { ok: false as const, error: "Phone number is required." };
-  if (!email.trim()) return { ok: false as const, error: "Email is required." };
-
-  const data = await apiPost<{ ok?: boolean; token?: string; profile?: CustomerProfile; error?: string }>(
-    "/auth/register",
-    { full_name: fullName.trim(), phone: normalized, email: email.trim().toLowerCase() }
-  );
-
-  if (data.error || !data.ok) {
-    return { ok: false as const, error: data.error ?? "Registration failed." };
-  }
-
-  setToken(data.token!, false);
-  const profile: CustomerProfile = {
-    id:       (data.profile as any)?.id,
-    fullName: (data.profile as any)?.fullName ?? "",
-    email:    (data.profile as any)?.email,
-    phone:    (data.profile as any)?.phone,
-    role:     (data.profile as any)?.role,
-  };
+  const profile = normalizeProfile(data.profile);
   setSession(profile);
   return { ok: true as const, user: profile };
 }

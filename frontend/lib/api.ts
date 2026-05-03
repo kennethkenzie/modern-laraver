@@ -10,15 +10,8 @@ export const API_URL =
     ? process.env.API_URL
     : process.env.NEXT_PUBLIC_API_URL) ?? "https://admin.e-modern.ug/api";
 
-/** Token stored in browser after login (localStorage or sessionStorage). */
-export function getClientToken(): string | null {
-  if (typeof window === "undefined") return null;
-  return (
-    localStorage.getItem("admin_token") ||
-    sessionStorage.getItem("admin_token") ||
-    null
-  );
-}
+/** Key used to store the auth token in browser storage. Shared with lib/auth.ts. */
+export const TOKEN_KEY = "admin_token";
 
 type FetchOptions = {
   method?: string;

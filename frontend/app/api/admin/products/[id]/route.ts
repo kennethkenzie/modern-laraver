@@ -3,9 +3,9 @@ import { proxyToLaravel } from "@/lib/proxy";
 
 type Context = { params: Promise<{ id: string }> };
 
-export async function GET(_: NextRequest, { params }: Context) {
+export async function GET(request: NextRequest, { params }: Context) {
   const { id } = await params;
-  return proxyToLaravel("GET", `/admin/products/${id}`);
+  return proxyToLaravel("GET", `/admin/products/${id}`, request);
 }
 
 export async function PATCH(request: NextRequest, { params }: Context) {
@@ -13,7 +13,7 @@ export async function PATCH(request: NextRequest, { params }: Context) {
   return proxyToLaravel("PATCH", `/admin/products/${id}`, request);
 }
 
-export async function DELETE(_: NextRequest, { params }: Context) {
+export async function DELETE(request: NextRequest, { params }: Context) {
   const { id } = await params;
-  return proxyToLaravel("DELETE", `/admin/products/${id}`);
+  return proxyToLaravel("DELETE", `/admin/products/${id}`, request);
 }
