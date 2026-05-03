@@ -1,15 +1,12 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { Loader2, Mail, Phone, User, X } from "lucide-react";
+import { Loader2, Lock, Mail, Phone, X } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { signInWithPhoneOrEmail, signUpWithPhone } from "@/lib/auth";
+import { login } from "@/lib/auth";
 
-type AuthMode = "login" | "register";
-type AuthStep = "details" | "otp";
 type AuthModalDetail = {
-  mode?: AuthMode;
   redirect?: string;
 };
 
@@ -18,55 +15,36 @@ const DEFAULT_REDIRECT = "/user";
 export default function AuthOverlay() {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
-  const [mode, setMode] = useState<AuthMode>("login");
-  const [step, setStep] = useState<AuthStep>("details");
   const [redirect, setRedirect] = useState(DEFAULT_REDIRECT);
-  const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
-  const [otp, setOtp] = useState("");
+  const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
 
-  const isRegister = mode === "register";
+  const canSubmit = useMemo(
+    () => (phone.trim().length > 0 || email.trim().length > 0) && password.length > 0,
+    [email, password, phone]
+  );
 
-  const canSubmit = useMemo(() => {
-    if (step === "otp") {
-      return otp.trim().length > 0;
-    }
-
-    if (isRegister) {
-      return fullName.trim().length > 0 && email.trim().length > 0 && phone.trim().length > 0;
-    }
-
-    return phone.trim().length > 0;
-  }, [email, fullName, isRegister, otp, phone, step]);
-
-  const resetState = (nextMode: AuthMode = mode) => {
-    setMode(nextMode);
-    setStep("details");
-    setOtp("");
+  const resetState = useCallback(() => {
+    setPassword("");
     setError("");
-    if (nextMode === "login") {
-      setFullName("");
-    }
-  };
+  }, []);
 
-  const closeModal = () => {
+  const closeModal = useCallback(() => {
     setIsOpen(false);
     setBusy(false);
-    setStep("details");
-    setOtp("");
+    setPassword("");
     setError("");
     window.dispatchEvent(new Event("auth:modal-close"));
-  };
+  }, []);
 
   useEffect(() => {
     const openModal = (detail?: AuthModalDetail) => {
-      const nextMode = detail?.mode === "register" ? "register" : "login";
       setRedirect(detail?.redirect || DEFAULT_REDIRECT);
       setIsOpen(true);
-      resetState(nextMode);
+      resetState();
     };
 
     const handleModalOpen = (event: Event) => {
@@ -74,11 +52,8 @@ export default function AuthOverlay() {
       openModal(customEvent.detail);
     };
 
-    const handleLegacyOpen = (event: Event) => {
-      const customEvent = event as CustomEvent<{ view?: "login" | "register" }>;
-      openModal({
-        mode: customEvent.detail?.view === "register" ? "register" : "login",
-      });
+    const handleLegacyOpen = () => {
+      openModal();
     };
 
     const handleClose = () => closeModal();
@@ -92,7 +67,7 @@ export default function AuthOverlay() {
       window.removeEventListener("auth:open-overlay", handleLegacyOpen as EventListener);
       window.removeEventListener("auth:close-overlay", handleClose);
     };
-  }, [mode]);
+  }, [closeModal, resetState]);
 
   useEffect(() => {
     if (!isOpen) {
@@ -109,53 +84,14 @@ export default function AuthOverlay() {
     return () => {
       window.removeEventListener("keydown", handleEscape);
     };
-  }, [isOpen]);
+  }, [closeModal, isOpen]);
 
-  async function sendOtp() {
+  async function submitAuth() {
     setBusy(true);
     setError("");
 
     try {
-      const response = await fetch("/api/auth/send-otp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone }),
-      });
-      const payload = (await response.json()) as { error?: string };
-
-      if (!response.ok) {
-        setError(payload.error || "Failed to send OTP.");
-        return;
-      }
-
-      setStep("otp");
-    } catch {
-      setError("Failed to send OTP.");
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  async function verifyOtp() {
-    setBusy(true);
-    setError("");
-
-    try {
-      const response = await fetch("/api/auth/verify-otp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone, code: otp }),
-      });
-      const payload = (await response.json()) as { error?: string };
-
-      if (!response.ok) {
-        setError(payload.error || "Failed to verify OTP.");
-        return;
-      }
-
-      const result = await (isRegister
-        ? signUpWithPhone(fullName, phone, email)
-        : signInWithPhoneOrEmail(phone, email));
+      const result = await login(email.trim() || phone, password);
 
       if (!result.ok) {
         setError(result.error);
@@ -165,7 +101,7 @@ export default function AuthOverlay() {
       closeModal();
       router.push(redirect);
     } catch {
-      setError("Failed to verify OTP.");
+      setError("Failed to sign in.");
     } finally {
       setBusy(false);
     }
@@ -195,69 +131,23 @@ export default function AuthOverlay() {
 
         <div className="border-b border-[#eaeded] px-6 py-5">
           <div className="text-[24px] font-semibold leading-none text-[#0f1111]">
-            {isRegister ? "Create account" : "Sign in"}
+            Sign in
           </div>
           <p className="mt-2 text-[13px] leading-5 text-[#565959]">
-            {isRegister
-              ? "Create your customer account and verify it with a one-time SMS code."
-              : "Use your phone number and verify with a one-time SMS code."}
+            Use your email or phone number and password.
           </p>
         </div>
 
         <div className="px-6 py-6">
-          <div className="mb-5 inline-flex rounded-full border border-[#d5d9d9] bg-[#f7fafa] p-1 text-[13px]">
-            <button
-              type="button"
-              onClick={() => resetState("login")}
-              className={`rounded-full px-4 py-2 font-medium transition ${
-                !isRegister ? "bg-[#ffd814] text-[#0f1111]" : "text-[#565959]"
-              }`}
-            >
-              Sign in
-            </button>
-            <button
-              type="button"
-              onClick={() => resetState("register")}
-              className={`rounded-full px-4 py-2 font-medium transition ${
-                isRegister ? "bg-[#ffd814] text-[#0f1111]" : "text-[#565959]"
-              }`}
-            >
-              Create account
-            </button>
-          </div>
-
           <div className="space-y-4">
-            {isRegister && step === "details" ? (
-              <>
-                <Field
-                  label="Full name"
-                  value={fullName}
-                  onChange={setFullName}
-                  placeholder="Your full name"
-                  icon={<User size={18} className="text-[#565959]" />}
-                  type="text"
-                />
-                <Field
-                  label="Email"
-                  value={email}
-                  onChange={setEmail}
-                  placeholder="you@example.com"
-                  icon={<Mail size={18} className="text-[#565959]" />}
-                  type="email"
-                />
-              </>
-            ) : null}
-
-            {!isRegister && step === "details" ? (
-              <Field
-                label="Email (optional)"
-                value={email}
-                onChange={setEmail}
-                placeholder="you@example.com"
-                icon={<Mail size={18} className="text-[#565959]" />}
-                type="email"
-              />
-            ) : null}
+            <Field
+              label="Email (optional)"
+              value={email}
+              onChange={setEmail}
+              placeholder="you@example.com"
+              icon={<Mail size={18} className="text-[#565959]" />}
+              type="email"
+            />
 
             <Field
               label="Phone number"
@@ -267,76 +157,34 @@ export default function AuthOverlay() {
               icon={<Phone size={18} className="text-[#565959]" />}
             />
 
-            {step === "otp" ? (
-              <label className="block">
-                <span className="mb-1 block text-[13px] font-bold text-[#0f1111]">
-                  Verification code
-                </span>
-                <input
-                  type="text"
-                  value={otp}
-                  onChange={(event) => setOtp(event.target.value)}
-                  placeholder="123456"
-                  className="h-11 w-full rounded-xl border border-[#a6a6a6] px-4 text-[15px] text-[#0f1111] shadow-[inset_0_1px_2px_rgba(15,17,17,0.08)] outline-none focus:border-[#007185]"
-                />
-              </label>
-            ) : null}
+            <Field
+              label="Password"
+              value={password}
+              onChange={setPassword}
+              placeholder="Your password"
+              icon={<Lock size={18} className="text-[#565959]" />}
+              type="password"
+            />
 
             {error ? <p className="text-[13px] text-[#b12704]">{error}</p> : null}
 
-            {step === "details" ? (
-              <button
-                type="button"
-                disabled={busy || !canSubmit}
-                onClick={() => void sendOtp()}
-                className="flex w-full items-center justify-center gap-2 rounded-full border border-[#fcd200] bg-[#ffd814] px-4 py-3 text-[14px] font-medium text-[#0f1111] shadow-[inset_0_-1px_0_rgba(0,0,0,0.15)] hover:bg-[#f7ca00] disabled:opacity-60"
-              >
-                {busy ? <Loader2 size={16} className="animate-spin" /> : null}
-                Send OTP
-              </button>
-            ) : (
-              <div className="space-y-3">
-                <button
-                  type="button"
-                  disabled={busy || !canSubmit}
-                  onClick={() => void verifyOtp()}
-                  className="flex w-full items-center justify-center gap-2 rounded-full border border-[#fcd200] bg-[#ffd814] px-4 py-3 text-[14px] font-medium text-[#0f1111] shadow-[inset_0_-1px_0_rgba(0,0,0,0.15)] hover:bg-[#f7ca00] disabled:opacity-60"
-                >
-                  {busy ? <Loader2 size={16} className="animate-spin" /> : null}
-                  {isRegister ? "Verify and create account" : "Verify and sign in"}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setStep("details");
-                    setOtp("");
-                    setError("");
-                  }}
-                  className="w-full text-[13px] font-medium text-[#007185] hover:underline"
-                >
-                  Change {isRegister ? "details" : "phone number"}
-                </button>
-              </div>
-            )}
+            <button
+              type="button"
+              disabled={busy || !canSubmit}
+              onClick={() => void submitAuth()}
+              className="flex w-full items-center justify-center gap-2 rounded-full border border-[#fcd200] bg-[#ffd814] px-4 py-3 text-[14px] font-medium text-[#0f1111] shadow-[inset_0_-1px_0_rgba(0,0,0,0.15)] hover:bg-[#f7ca00] disabled:opacity-60"
+            >
+              {busy ? <Loader2 size={16} className="animate-spin" /> : null}
+              Sign in
+            </button>
           </div>
 
           <div className="mt-6 border-t border-[#eaeded] pt-5 text-[12px] leading-5 text-[#565959]">
             By continuing, you agree to Modern Electronics account access for checkout, orders, and saved items.
           </div>
 
-          <div className="mt-4 text-[13px] text-[#565959]">
-            {isRegister ? "Already have an account?" : "New to Modern Electronics?"}{" "}
-            <button
-              type="button"
-              onClick={() => resetState(isRegister ? "login" : "register")}
-              className="font-medium text-[#007185] hover:underline"
-            >
-              {isRegister ? "Sign in instead" : "Create your account"}
-            </button>
-          </div>
-
           <div className="mt-4 text-[12px] text-[#565959]">
-            <Link href={isRegister ? "/login" : "/register"} className="hover:underline">
+            <Link href="/login" className="hover:underline">
               Open this form on its own page
             </Link>
           </div>
