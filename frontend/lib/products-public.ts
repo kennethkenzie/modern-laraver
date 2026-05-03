@@ -1,7 +1,7 @@
 /**
  * Server-side public product helpers — fetch from the Laravel API instead of Prisma.
  */
-import { apiFetch } from "@/lib/api";
+import { apiFetch, ADMIN_API_TOKEN } from "@/lib/api";
 import type { ProductSpec, RelatedProduct } from "@/lib/frontend-data";
 
 // ─── shared types ─────────────────────────────────────────────
@@ -405,6 +405,60 @@ async function loadCategoryFeatureByCandidates(
   };
 }
 
+/**
+ * Fetch products from the admin endpoint and filter by category slug or name.
+ * Used as a last resort when the public /categories/{slug}/products returns
+ * empty (e.g. because products have no price set and are filtered out).
+ */
+async function getProductsFromAdminByCategoryMatch(
+  slugKeywords: string[],
+  nameKeywords: string[]
+): Promise<FeatureCategory | null> {
+  try {
+    const data = await apiFetch<{
+      products: Array<{
+        id: string;
+        name: string;
+        image: string;
+        slug: string;
+        category: string;
+        price: number;
+        isPublished: boolean;
+      }>;
+    }>("/admin/products", { token: ADMIN_API_TOKEN || null });
+
+    const all = data.products ?? [];
+
+    // Match by category name or slug keywords (case-insensitive)
+    const matched = all.filter((p) => {
+      if (!p.isPublished) return false;
+      const cat = (p.category ?? "").toLowerCase();
+      return (
+        slugKeywords.some((k) => cat.includes(k.toLowerCase())) ||
+        nameKeywords.some((k) => cat.includes(k.toLowerCase()))
+      );
+    });
+
+    const withImages = matched.filter((p) => p.image);
+    if (!withImages.length) return null;
+
+    const catName = withImages[0].category || "Spare parts and Components";
+    return {
+      title: catName,
+      slug: slugKeywords[0],
+      products: withImages.map((p) => ({
+        id: p.id,
+        name: p.name,
+        image: p.image,
+        href: `/product/${p.slug}`,
+        price: p.price,
+      })),
+    };
+  } catch {
+    return null;
+  }
+}
+
 export async function getSparePartsCategoryFeature(): Promise<FeatureCategory | null> {
   // 1. Try canonical slugs directly first.
   const directSlugs = [
@@ -435,7 +489,14 @@ export async function getSparePartsCategoryFeature(): Promise<FeatureCategory | 
   ]);
   if (patternMatch) return patternMatch;
 
-  // 3. Last resort: return the first active category that has products with images.
+  // 3. Try admin endpoint — bypasses the public price > 0 filter entirely.
+  const adminMatch = await getProductsFromAdminByCategoryMatch(
+    ["spare-parts", "spare_parts", "tv-parts", "components"],
+    ["spare parts", "tv parts", "spare", "parts", "component"]
+  );
+  if (adminMatch) return adminMatch;
+
+  // 4. Last resort: return the first active category that has products with images.
   try {
     const allCategories = await getFrontendCategories();
     const active = allCategories.filter((c) => c.isActive !== false && c.slug);
@@ -488,8 +549,14 @@ export async function getApplianceCategoryFeature(): Promise<FeatureCategory | n
   ]);
   if (patternMatch) return patternMatch;
 
-  // Last resort: try every active category and return the first one that has
-  // products with images — so the tile card always shows something.
+  // Try admin endpoint — bypasses the price > 0 filter.
+  const adminMatch = await getProductsFromAdminByCategoryMatch(
+    ["home-appliances", "appliances", "appliance"],
+    ["appliance", "home appliance", "refrigerator", "washing", "kitchen"]
+  );
+  if (adminMatch) return adminMatch;
+
+  // Last resort: try every active category that has products with images.
   try {
     const allCategories = await getFrontendCategories();
     const active = allCategories.filter((c) => c.isActive !== false && c.slug);
