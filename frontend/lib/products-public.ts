@@ -406,13 +406,56 @@ async function loadCategoryFeatureByCandidates(
 }
 
 export async function getSparePartsCategoryFeature(): Promise<FeatureCategory | null> {
+  // 1. Try canonical slugs directly first.
+  const directSlugs = [
+    "spare-parts", "tv-spare-parts", "tv-parts", "spare-parts-components",
+    "components", "spare", "parts",
+  ];
+  for (const slug of directSlugs) {
+    const data = await getProductsByCategorySlug(slug);
+    if (data?.products && data.products.filter((p) => p.image).length > 0) {
+      return {
+        title: data.title || "Spare parts and Components",
+        slug: data.slug || slug,
+        products: data.products
+          .filter((p) => p.image)
+          .map((p) => ({ id: p.id, name: p.name, image: p.image, href: p.href, price: p.price })),
+      };
+    }
+  }
+
+  // 2. Pattern-match against the live category list.
   const lc = (s?: string) => (s ?? "").toLowerCase();
-  return loadCategoryFeatureByCandidates([
+  const patternMatch = await loadCategoryFeatureByCandidates([
     (c) => /spare\s*parts?/i.test(c.title) || /spare[-_]?parts?/i.test(c.slug),
     (c) => /tv\s*parts?/i.test(c.title) || /tv[-_]?parts?/i.test(c.slug),
     (c) => /parts?/i.test(c.title) || /parts?/.test(lc(c.slug)),
     (c) => lc(c.rootCategory).includes("spare") || lc(c.rootCategory).includes("parts"),
+    (c) => /component|board|panel|module|circuit|capacitor|resistor/i.test(c.title),
   ]);
+  if (patternMatch) return patternMatch;
+
+  // 3. Last resort: return the first active category that has products with images.
+  try {
+    const allCategories = await getFrontendCategories();
+    const active = allCategories.filter((c) => c.isActive !== false && c.slug);
+    for (const cat of active) {
+      const data = await getProductsByCategorySlug(cat.slug);
+      if (data?.products && data.products.filter((p) => p.image).length > 0) {
+        return {
+          title: data.title || cat.title,
+          slug: data.slug || cat.slug,
+          products: data.products
+            .filter((p) => p.image)
+            .map((p) => ({ id: p.id, name: p.name, image: p.image, href: p.href, price: p.price })),
+        };
+      }
+    }
+  } catch {
+    /* ignore */
+  }
+
+  return null;
 }
 
 export async function getApplianceCategoryFeature(): Promise<FeatureCategory | null> {
