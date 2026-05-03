@@ -34,23 +34,17 @@ type ApplianceFeature = {
   }>;
 };
 
-function pickRandomTiles(
+function pickTiles(
   products: SparePartsFeature["products"],
-  count = 4
+  count = 4,
+  offset = 0
 ): CategoryTile[] {
-  const shuffled = [...products].sort(() => Math.random() - 0.5);
-  return shuffled.slice(0, count).map((product) => ({
-    label: product.name,
-    image: product.image,
-    href: product.href,
-  }));
-}
+  if (products.length === 0) return [];
 
-function pickInitialTiles(
-  products: SparePartsFeature["products"],
-  count = 4
-): CategoryTile[] {
-  return products.slice(0, count).map((product) => ({
+  const start = offset % products.length;
+  return Array.from({ length: Math.min(count, products.length) }, (_, index) => {
+    return products[(start + index) % products.length];
+  }).map((product) => ({
     label: product.name,
     image: product.image,
     href: product.href,
@@ -66,8 +60,11 @@ export default function CategoryTilesSection({
 }) {
   const { data } = useFrontendData();
   const cards = data.categoryTiles.cards;
-  const [sparePartsTiles, setSparePartsTiles] = useState<CategoryTile[]>(() =>
-    sparePartsFeature ? pickInitialTiles(sparePartsFeature.products) : []
+  const [sparePartsOffset, setSparePartsOffset] = useState(0);
+  const [applianceOffset, setApplianceOffset] = useState(0);
+  const sparePartsTiles = useMemo(
+    () => (sparePartsFeature ? pickTiles(sparePartsFeature.products, 4, sparePartsOffset) : []),
+    [sparePartsFeature, sparePartsOffset]
   );
   const featuredSparePartsTiles = useMemo(
     () =>
@@ -83,31 +80,28 @@ export default function CategoryTilesSection({
 
   useEffect(() => {
     if (!sparePartsFeature || sparePartsFeature.products.length === 0) {
-      setSparePartsTiles([]);
       return;
     }
 
-    setSparePartsTiles(pickRandomTiles(sparePartsFeature.products));
     const interval = window.setInterval(() => {
-      setSparePartsTiles(pickRandomTiles(sparePartsFeature.products));
+      setSparePartsOffset((current) => current + 1);
     }, 7000);
 
     return () => window.clearInterval(interval);
   }, [sparePartsFeature]);
 
-  const [applianceTiles, setApplianceTiles] = useState<CategoryTile[]>(() =>
-    applianceFeature ? pickInitialTiles(applianceFeature.products) : []
+  const applianceTiles = useMemo(
+    () => (applianceFeature ? pickTiles(applianceFeature.products, 4, applianceOffset) : []),
+    [applianceFeature, applianceOffset]
   );
 
   useEffect(() => {
     if (!applianceFeature || applianceFeature.products.length === 0) {
-      setApplianceTiles([]);
       return;
     }
 
-    setApplianceTiles(pickRandomTiles(applianceFeature.products));
     const interval = window.setInterval(() => {
-      setApplianceTiles(pickRandomTiles(applianceFeature.products));
+      setApplianceOffset((current) => current + 1);
     }, 7000);
 
     return () => window.clearInterval(interval);
@@ -151,14 +145,14 @@ export default function CategoryTilesSection({
           },
         };
       }
-      if (idx === 2 && applianceFeature && applianceTiles.length > 0) {
+      if (idx === 2) {
         return {
           ...card,
           title: "Home Appliance",
-          tiles: applianceTiles,
+          tiles: applianceTiles.length > 0 ? applianceTiles : card.tiles,
           cta: {
             label: "Shop appliances",
-            href: applianceFeature.href,
+            href: applianceFeature?.href ?? "/category/home-appliances",
           },
         };
       }
@@ -188,7 +182,7 @@ export default function CategoryTilesSection({
                       className="group block"
                       aria-label={t.label}
                     >
-                      <div className="relative aspect-[4/3] overflow-hidden rounded-xl bg-gray-100">
+                      <div className="relative aspect-[4/3] overflow-hidden rounded-xl">
                         <SafeImage
                           src={t.image}
                           alt={t.label}
