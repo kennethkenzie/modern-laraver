@@ -5,18 +5,33 @@ const nextConfig: NextConfig = {
     NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL ?? "https://admin.e-modern.ug/api",
   },
 
-  // Allow product images served from any external host (Cloudinary, etc.)
   images: {
+    // Allow product images from any host (Laravel storage, Cloudinary, etc.)
     remotePatterns: [
       { protocol: "https", hostname: "**" },
       { protocol: "http",  hostname: "**" },
     ],
+    // Generate WebP + AVIF for supported browsers (~60-80% smaller than JPEG/PNG)
+    formats: ["image/avif", "image/webp"],
+    // Serve images at these breakpoints so browsers pick the right size
+    deviceSizes: [375, 640, 750, 828, 1080, 1200, 1920],
+    imageSizes: [16, 32, 64, 96, 128, 256, 384],
+    // Cache optimized images for 30 days on the CDN
+    minimumCacheTTL: 2592000,
   },
 
   async headers() {
     return [
       {
-        // Allow the Laravel backend to be called from the browser
+        // Preconnect to the backend image origin so the browser opens the
+        // TCP connection before images are requested.
+        source: "/",
+        headers: [
+          { key: "Link", value: "<https://admin.e-modern.ug>; rel=preconnect" },
+          { key: "Link", value: "<https://res.cloudinary.com>; rel=preconnect" },
+        ],
+      },
+      {
         source: "/api/:path*",
         headers: [
           { key: "Access-Control-Allow-Origin",  value: "*" },

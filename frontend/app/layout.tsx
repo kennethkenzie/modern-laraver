@@ -146,6 +146,12 @@ export default async function RootLayout({
 
   return (
     <html lang="en">
+      <head>
+        {/* Preconnect to image origins so TCP is ready before images are fetched */}
+        <link rel="preconnect" href="https://admin.e-modern.ug" />
+        <link rel="preconnect" href="https://res.cloudinary.com" />
+        <link rel="dns-prefetch" href="https://admin.e-modern.ug" />
+      </head>
       <body className="antialiased">
         {children}
         <MiniCart />

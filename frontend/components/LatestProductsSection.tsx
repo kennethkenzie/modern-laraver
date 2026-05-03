@@ -149,8 +149,8 @@ export default function LatestProductsSection({
         </div>
 
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
-          {items.map((product) => (
-            <ProductCard key={product.renderKey} product={product} />
+          {items.map((product, i) => (
+            <ProductCard key={product.renderKey} product={product} priority={i < 4} />
           ))}
           {isLoading ? Array.from({ length: Math.min(PAGE_SIZE, 8) }).map((_, index) => <ProductSkeleton key={`skeleton-${requestCount}-${index}`} />) : null}
         </div>
@@ -219,7 +219,7 @@ async function fetchMore(
   }
 }
 
-function ProductCard({ product: p }: { product: ProductFeedItem }) {
+function ProductCard({ product: p, priority }: { product: ProductFeedItem; priority?: boolean }) {
   return (
     <article
       className={[
@@ -227,7 +227,7 @@ function ProductCard({ product: p }: { product: ProductFeedItem }) {
         p.isFresh ? "latest-product-enter" : "",
       ].join(" ")}
     >
-      <div className="relative overflow-hidden rounded-t-[22px]">
+      <div className="relative aspect-square overflow-hidden rounded-t-[22px]">
         <WishlistButton
           item={{
             id: p.id,
@@ -239,12 +239,14 @@ function ProductCard({ product: p }: { product: ProductFeedItem }) {
           className="absolute right-3 top-3 z-10 inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/95 text-gray-700 shadow-sm transition hover:bg-white"
         />
 
-        <Link href={p.href} aria-label={p.name} className="block">
+        <Link href={p.href} aria-label={p.name} className="absolute inset-0">
           <SafeImage
             src={p.image}
             alt={p.name}
-            loading="lazy"
-            className="aspect-square w-full object-contain transition-transform duration-500 group-hover:scale-[1.04]"
+            fill
+            priority={priority}
+            sizes="(max-width: 640px) 100vw, (max-width: 1280px) 50vw, (max-width: 1536px) 33vw, 25vw"
+            className="object-contain transition-transform duration-500 group-hover:scale-[1.04]"
           />
         </Link>
       </div>
