@@ -6,7 +6,7 @@ const nextConfig: NextConfig = {
   },
 
   images: {
-    // Allow product images from any host (Laravel storage, Cloudinary, etc.)
+    // Allow product images from Laravel storage and external product feeds.
     remotePatterns: [
       { protocol: "https", hostname: "**" },
       { protocol: "http",  hostname: "**" },
@@ -28,7 +28,6 @@ const nextConfig: NextConfig = {
         source: "/",
         headers: [
           { key: "Link", value: "<https://admin.e-modern.ug>; rel=preconnect" },
-          { key: "Link", value: "<https://res.cloudinary.com>; rel=preconnect" },
         ],
       },
       {

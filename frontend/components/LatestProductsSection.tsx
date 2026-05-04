@@ -13,7 +13,7 @@ import Link from "next/link";
 import { ShoppingBag, Star } from "lucide-react";
 import SafeImage from "@/components/SafeImage";
 import { addToCart } from "@/lib/cart";
-import { toCloudinaryUrl } from "@/lib/cloudinary";
+import { normalizeMediaUrl } from "@/lib/media";
 import type { LatestProduct } from "@/lib/frontend-data";
 import WishlistButton from "@/components/WishlistButton";
 
@@ -233,7 +233,7 @@ function ProductCard({ product: p, priority }: { product: ProductFeedItem; prior
             id: p.id,
             name: p.name,
             price: p.price,
-            image: toCloudinaryUrl(p.image),
+            image: normalizeMediaUrl(p.image),
             href: p.href,
           }}
           className="absolute right-3 top-3 z-10 inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/95 text-gray-700 shadow-sm transition hover:bg-white"
@@ -280,7 +280,7 @@ function ProductCard({ product: p, priority }: { product: ProductFeedItem; prior
               id: p.id,
               name: p.name,
               price: p.price,
-              image: toCloudinaryUrl(p.image),
+              image: normalizeMediaUrl(p.image),
               href: p.href,
             })
           }

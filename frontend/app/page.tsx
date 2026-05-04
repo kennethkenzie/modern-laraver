@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { mergeFrontendData } from "@/lib/frontend-data-merge";
-import { readFrontendDataFromPrisma } from "@/lib/site-settings";
+import { readFrontendData } from "@/lib/site-settings";
 import NavBar from "@/components/NavBar";
 import HeroCarouselWithRightCards from "@/components/HeroCarouselWithRightCards";
 import TrustBar from "@/components/TrustBar";
@@ -43,7 +43,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function Home() {
   const frontendData =
-    (await readFrontendDataFromPrisma().catch(() => null)) ?? mergeFrontendData({});
+    (await readFrontendData().catch(() => null)) ?? mergeFrontendData({});
   const [latestProductsResult, sparePartsCategoryResult, applianceCategoryResult] = await Promise.allSettled([
     getLatestPublishedProducts(10),
     getSparePartsCategoryFeature(),
@@ -117,4 +117,3 @@ export default async function Home() {
     </main>
   );
 }
-

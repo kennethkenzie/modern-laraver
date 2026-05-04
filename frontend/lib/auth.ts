@@ -28,6 +28,8 @@ type AuthResponse = {
   token?: string;
   profile?: CustomerProfile;
   error?: string;
+  message?: string;
+  errors?: Record<string, string[]>;
 };
 
 // ─── token helpers ──────────────────────────────────────────
@@ -86,7 +88,15 @@ export function isLoggedIn() {
 
 // ─── API helpers ─────────────────────────────────────────────
 
-async function apiPost<T>(path: string, body: unknown, token?: string): Promise<T> {
+function getResponseError(data: AuthResponse, fallback: string) {
+  if (data.error) return data.error;
+  if (data.message) return data.message;
+
+  const firstValidationError = Object.values(data.errors ?? {})[0]?.[0];
+  return firstValidationError ?? fallback;
+}
+
+async function apiPost<T extends AuthResponse>(path: string, body: unknown, token?: string): Promise<T> {
   const res = await fetch(`${AUTH_API_BASE}${path}`, {
     method: "POST",
     headers: {
@@ -96,22 +106,34 @@ async function apiPost<T>(path: string, body: unknown, token?: string): Promise<
     },
     body: JSON.stringify(body),
   });
-  return res.json() as Promise<T>;
+
+  const contentType = res.headers.get("content-type") ?? "";
+  const data = contentType.includes("application/json")
+    ? ((await res.json().catch(() => ({}))) as T)
+    : ({ error: await res.text().catch(() => res.statusText) } as T);
+
+  if (!res.ok && !data.error && !data.message) {
+    data.error = res.statusText || "Request failed.";
+  }
+
+  return data;
 }
 
 // ─── public auth functions ────────────────────────────────────
 
-export async function signup(fullName: string, emailOrPhone: string, password: string) {
-  const value = emailOrPhone.trim();
-  const isEmail = value.includes("@");
-  const payload = isEmail
-    ? { name: fullName, email: value.toLowerCase(), password, password_confirmation: password }
-    : { name: fullName, phone: normalizePhoneNumber(value) || value, password, password_confirmation: password };
+export async function signup(fullName: string, email: string, phone: string, password: string) {
+  const normalizedPhone = normalizePhoneNumber(phone.trim()) || phone.trim();
+  const payload = {
+    full_name: fullName,
+    phone: normalizedPhone,
+    ...(email.trim() ? { email: email.trim().toLowerCase() } : {}),
+    password,
+  };
 
   const data = await apiPost<AuthResponse>("/register", payload);
 
   if (data.error || !data.ok) {
-    return { ok: false as const, error: data.error ?? "Registration failed." };
+    return { ok: false as const, error: getResponseError(data, "Registration failed.") };
   }
 
   setToken(data.token!, false);
@@ -134,7 +156,7 @@ export async function login(emailOrPhone: string, password: string) {
   );
 
   if (data.error || !data.ok) {
-    return { ok: false as const, error: data.error ?? "Login failed." };
+    return { ok: false as const, error: getResponseError(data, "Login failed.") };
   }
 
   setToken(data.token!, false);

@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { login, signup } from "@/lib/auth";
 
 type AuthModalDetail = {
+  mode?: "login" | "register";
   redirect?: string;
   tab?: "login" | "signup";
 };
@@ -37,7 +38,7 @@ export default function AuthOverlay() {
   );
 
   const canSubmitSignup = useMemo(
-    () => fullName.trim().length > 0 && (email.trim().length > 0 || phone.trim().length > 0) && password.length > 0 && confirmPassword.length > 0,
+    () => fullName.trim().length > 0 && phone.trim().length > 0 && password.length > 0 && confirmPassword.length > 0,
     [fullName, email, phone, password, confirmPassword]
   );
 
@@ -64,7 +65,7 @@ export default function AuthOverlay() {
   useEffect(() => {
     const openModal = (detail?: AuthModalDetail) => {
       setRedirect(detail?.redirect || DEFAULT_REDIRECT);
-      setTab(detail?.tab || "login");
+      setTab(detail?.tab || (detail?.mode === "register" ? "signup" : "login"));
       setIsOpen(true);
       resetState();
     };
@@ -114,14 +115,14 @@ export default function AuthOverlay() {
 
   async function submitSignup() {
     if (!fullName.trim()) { setError("Full name is required."); return; }
-    if (!email.trim() && !phone.trim()) { setError("Email or phone number is required."); return; }
+    if (!phone.trim()) { setError("Phone number is required."); return; }
     if (password.length < 6) { setError("Password must be at least 6 characters."); return; }
     if (password !== confirmPassword) { setError("Passwords do not match."); return; }
 
     setBusy(true);
     setError("");
     try {
-      const result = await signup(fullName.trim(), email.trim() || phone.trim(), password);
+      const result = await signup(fullName.trim(), email.trim(), phone.trim(), password);
       if (!result.ok) { setError(result.error); return; }
       closeModal();
       router.push(redirect);
@@ -237,8 +238,8 @@ export default function AuthOverlay() {
 
           <div className="mt-5 border-t border-[#eaeded] pt-4 text-[12px] text-[#565959]">
             By continuing, you agree to our Terms of Service and Privacy Policy.{" "}
-            <Link href="/login" className="hover:underline">
-              Open on full page →
+            <Link href={tab === "signup" ? "/register" : "/login"} className="hover:underline">
+              Open on full page
             </Link>
           </div>
         </div>

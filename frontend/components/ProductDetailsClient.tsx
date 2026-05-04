@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import SafeImage from "@/components/SafeImage";
 import { addToCart } from "@/lib/cart";
-import { toCloudinaryUrl } from "@/lib/cloudinary";
+import { normalizeMediaUrl } from "@/lib/media";
 import type { PublicProductPageData } from "@/lib/products-public";
 import WishlistButton from "@/components/WishlistButton";
 import { isLoggedIn } from "@/lib/auth";
@@ -85,7 +85,7 @@ export default function ProductDetailsClient({
         id: selectedVariant.id,
         name: `${product.name} (${selectedVariant.label})`,
         price: selectedVariant.price,
-        image: toCloudinaryUrl(selectedImage?.image || ""),
+        image: normalizeMediaUrl(selectedImage?.image || ""),
         href: `/product/${product.slug}`,
       }
     : null;
@@ -612,7 +612,7 @@ export default function ProductDetailsClient({
                       ? `${product.name} (${selectedVariant.label})`
                       : product.name,
                     price: selectedVariant?.price || 0,
-                    image: toCloudinaryUrl(selectedImage?.image || ""),
+                    image: normalizeMediaUrl(selectedImage?.image || ""),
                     href: `/product/${product.slug}`,
                   }}
                   label="Add to List"

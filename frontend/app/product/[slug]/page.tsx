@@ -10,7 +10,7 @@ import {
   getRelatedProductsForProduct,
   getSameCategoryProductsForSearch,
 } from "@/lib/products-public";
-import { readFrontendDataFromPrisma } from "@/lib/site-settings";
+import { readFrontendData } from "@/lib/site-settings";
 import { mergeFrontendData } from "@/lib/frontend-data-merge";
 import {
   SITE_NAME,
@@ -93,7 +93,7 @@ export default async function ProductDetailsPage({
   }
 
   const [frontendDataRaw, relatedProducts, frequentlyViewed, searchSuggestions] = await Promise.all([
-    readFrontendDataFromPrisma().catch(() => null),
+    readFrontendData().catch(() => null),
     getRelatedProductsForProduct(product.id, product.categoryId),
     getFrequentlyViewedProducts(product.id, product.categoryId),
     getSameCategoryProductsForSearch(product.id, product.categoryId),

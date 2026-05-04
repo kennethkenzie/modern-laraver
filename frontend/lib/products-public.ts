@@ -1,5 +1,5 @@
 /**
- * Server-side public product helpers — fetch from the Laravel API instead of Prisma.
+ * Server-side public product helpers — fetch from the Laravel API.
  */
 import { apiFetch, ADMIN_API_TOKEN } from "@/lib/api";
 import type { ProductSpec, RelatedProduct } from "@/lib/frontend-data";

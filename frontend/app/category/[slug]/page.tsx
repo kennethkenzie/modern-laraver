@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { Star } from "lucide-react";
 import NavBar from "@/components/NavBar";
 import SafeImage from "@/components/SafeImage";
-import { readFrontendDataFromPrisma } from "@/lib/site-settings";
+import { readFrontendData } from "@/lib/site-settings";
 import { mergeFrontendData } from "@/lib/frontend-data-merge";
 import { getProductsByCategorySlug, getSearchSuggestionsByCategory, type CategorySubCategory } from "@/lib/products-public";
 import {
@@ -112,7 +112,7 @@ export default async function CategoryPage({
   const { slug } = await params;
   const [categoryData, frontendData] = await Promise.all([
     getProductsByCategorySlug(slug),
-    readFrontendDataFromPrisma().then((d) => d ?? mergeFrontendData({})),
+    readFrontendData().then((d) => d ?? mergeFrontendData({})),
   ]);
 
   if (!categoryData) {

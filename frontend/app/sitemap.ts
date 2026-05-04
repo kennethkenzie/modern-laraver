@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 import { SITE_URL } from "@/lib/seo";
 import { getLatestPublishedProductsPage } from "@/lib/products-admin";
-import { readFrontendDataFromPrisma } from "@/lib/site-settings";
+import { readFrontendData } from "@/lib/site-settings";
 import { mergeFrontendData } from "@/lib/frontend-data-merge";
 
 export const revalidate = 3600; // regenerate at most once per hour
@@ -51,7 +51,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();
 
   const [frontendDataRaw, products] = await Promise.all([
-    readFrontendDataFromPrisma().catch(() => null),
+    readFrontendData().catch(() => null),
     collectAllProducts().catch(() => []),
   ]);
 

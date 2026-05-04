@@ -1,12 +1,8 @@
-/**
- * site-settings.ts - delegates all reads/writes to the Laravel backend.
- * Previously called Prisma directly; now uses the REST API.
- */
 import { API_URL, ADMIN_API_TOKEN } from "@/lib/api";
 import { mergeFrontendData } from "@/lib/frontend-data-merge";
 import type { FrontendData } from "@/lib/frontend-data";
 
-export async function readFrontendDataFromPrisma(): Promise<FrontendData | null> {
+export async function readFrontendData(): Promise<FrontendData | null> {
   try {
     const response = await fetch(`${API_URL}/frontend-data`, {
       method: "GET",
@@ -28,7 +24,7 @@ export async function readFrontendDataFromPrisma(): Promise<FrontendData | null>
   }
 }
 
-export async function writeFrontendDataToPrisma(data: FrontendData): Promise<FrontendData> {
+export async function writeFrontendData(data: FrontendData): Promise<FrontendData> {
   try {
     const response = await fetch(`${API_URL}/admin/frontend-data`, {
       method: "PUT",

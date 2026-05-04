@@ -2,7 +2,7 @@
 
 import NextImage from "next/image";
 import { useState } from "react";
-import { toCloudinaryUrl } from "@/lib/cloudinary";
+import { normalizeMediaUrl } from "@/lib/media";
 
 type SafeImageProps = {
   src: string;
@@ -30,7 +30,7 @@ export default function SafeImage({
   height,
   quality = 82,
 }: SafeImageProps) {
-  const resolved = toCloudinaryUrl(src);
+  const resolved = normalizeMediaUrl(src);
   const [imgSrc, setImgSrc] = useState(resolved);
   const [failed, setFailed] = useState(false);
 

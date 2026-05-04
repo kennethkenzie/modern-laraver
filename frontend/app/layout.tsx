@@ -3,7 +3,7 @@ import "./globals.css";
 import MiniCart from "@/components/MiniCart";
 import AuthOverlay from "@/components/AuthOverlay";
 
-import { readFrontendDataFromPrisma } from "@/lib/site-settings";
+import { readFrontendData } from "@/lib/site-settings";
 import { mergeFrontendData } from "@/lib/frontend-data-merge";
 import {
   SITE_URL,
@@ -18,8 +18,8 @@ import {
 } from "@/lib/seo";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const prismaData = await readFrontendDataFromPrisma().catch(() => null);
-  const data = mergeFrontendData(prismaData ?? {});
+  const frontendData = await readFrontendData().catch(() => null);
+  const data = mergeFrontendData(frontendData ?? {});
   const nav = data.navbar;
 
   const siteTitle = nav.siteTitle || SITE_NAME;
@@ -100,8 +100,8 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const prismaData = await readFrontendDataFromPrisma().catch(() => null);
-  const data = mergeFrontendData(prismaData ?? {});
+  const frontendData = await readFrontendData().catch(() => null);
+  const data = mergeFrontendData(frontendData ?? {});
   const nav = data.navbar;
   const siteTitle = nav.siteTitle || SITE_NAME;
 
@@ -149,7 +149,6 @@ export default async function RootLayout({
       <head>
         {/* Preconnect to image origins so TCP is ready before images are fetched */}
         <link rel="preconnect" href="https://admin.e-modern.ug" />
-        <link rel="preconnect" href="https://res.cloudinary.com" />
         <link rel="dns-prefetch" href="https://admin.e-modern.ug" />
       </head>
       <body className="antialiased">

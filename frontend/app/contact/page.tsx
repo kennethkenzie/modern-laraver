@@ -1,7 +1,7 @@
 import NavBar from "@/components/NavBar";
 import Footer from "@/components/Footer";
 import ContactClient from "./ContactClient";
-import { readFrontendDataFromPrisma as readFrontendData } from "@/lib/site-settings";
+import { readFrontendData } from "@/lib/site-settings";
 import { mergeFrontendData } from "@/lib/frontend-data-merge";
 import { API_URL } from "@/lib/api";
 import type { Metadata } from "next";

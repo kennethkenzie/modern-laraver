@@ -47,14 +47,14 @@ export default function LoginPageClient() {
 
   async function submitSignup() {
     if (!fullName.trim()) { setError("Full name is required."); return; }
-    if (!email.trim() && !phone.trim()) { setError("Email or phone number is required."); return; }
+    if (!phone.trim()) { setError("Phone number is required."); return; }
     if (password.length < 6) { setError("Password must be at least 6 characters."); return; }
     if (password !== confirmPassword) { setError("Passwords do not match."); return; }
 
     setBusy(true);
     setError("");
     try {
-      const result = await signup(fullName.trim(), email.trim() || phone.trim(), password);
+      const result = await signup(fullName.trim(), email.trim(), phone.trim(), password);
       if (!result.ok) { setError(result.error); return; }
       router.push(redirect);
     } catch {
@@ -148,7 +148,7 @@ export default function LoginPageClient() {
 
                   <button
                     type="button"
-                    disabled={busy || !fullName.trim() || (!phone.trim() && !email.trim()) || !password || !confirmPassword}
+                    disabled={busy || !fullName.trim() || !phone.trim() || !password || !confirmPassword}
                     onClick={() => void submitSignup()}
                     className="flex w-full items-center justify-center gap-2 rounded-full border border-[#fcd200] bg-[#ffd814] px-4 py-3 text-[14px] font-medium text-[#0f1111] shadow-[inset_0_-1px_0_rgba(0,0,0,0.15)] hover:bg-[#f7ca00] disabled:opacity-60"
                   >
