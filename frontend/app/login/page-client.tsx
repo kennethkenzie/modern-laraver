@@ -114,7 +114,7 @@ export default function LoginPageClient() {
                 <div className="space-y-4">
                   <Field label="Email" value={email} onChange={setEmail} placeholder="you@example.com" icon={<Mail size={18} className="text-[#565959]" />} type="email" />
                   <Field label="Phone number" value={phone} onChange={v => setPhone(v.replace(/[^\d+]/g, ""))} placeholder="+256..." icon={<Phone size={18} className="text-[#565959]" />} type="tel" />
-                  <Field label="Password" value={password} onChange={setPassword} placeholder="Min. 8 characters"
+                  <Field label="Password" value={password} onChange={setPassword} placeholder="Min. 8 characters" icon={<Lock size={18} className="text-[#565959]" />} type="password" />
 
                   {error ? <p className="text-[13px] text-[#b12704]">{error}</p> : null}
 
@@ -145,7 +145,7 @@ export default function LoginPageClient() {
                   <Field label="Full name" value={fullName} onChange={setFullName} placeholder="John Doe" icon={<User size={18} className="text-[#565959]" />} />
                   <Field label="Email (optional)" value={email} onChange={setEmail} placeholder="you@example.com" icon={<Mail size={18} className="text-[#565959]" />} type="email" />
                   <Field label="Phone number" value={phone} onChange={v => setPhone(v.replace(/[^\d+]/g, ""))} placeholder="+256..." icon={<Phone size={18} className="text-[#565959]" />} type="tel" />
-                  <Field label="Password" value={password} onChange={setPassword} placeholder="Min. 8 characters"
+                  <Field label="Password" value={password} onChange={setPassword} placeholder="Min. 8 characters" icon={<Lock size={18} className="text-[#565959]" />} type="password" />
                   <Field label="Confirm password" value={confirmPassword} onChange={setConfirmPassword} placeholder="Repeat your password" icon={<Lock size={18} className="text-[#565959]" />} type="password" />
 
                   {error ? <p className="text-[13px] text-[#b12704]">{error}</p> : null}
