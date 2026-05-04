@@ -13,7 +13,7 @@ export async function readFrontendDataFromPrisma(): Promise<FrontendData | null>
       headers: {
         Accept: "application/json",
       },
-      cache: "no-store",
+      next: { revalidate: 300 },
     });
 
     if (!response.ok) {
