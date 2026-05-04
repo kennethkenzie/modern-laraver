@@ -140,7 +140,7 @@
                     {{-- Orders --}}
                     <a href="{{ route('dashboard.orders') }}"
                        class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 transition
-                              {{ request()->routeIs('dashboard.orders') ? 'bg-[#114f8f] text-white shadow-lg shadow-blue-900/20 font-semibold' : 'text-gray-400 hover:bg-white/5 hover:text-white font-medium' }}">
+                              {{ request()->routeIs('dashboard.orders*') ? 'bg-[#114f8f] text-white shadow-lg shadow-blue-900/20 font-semibold' : 'text-gray-400 hover:bg-white/5 hover:text-white font-medium' }}">
                         <i data-lucide="shopping-cart" class="h-[18px] w-[18px] shrink-0"></i>
                         <span>Orders</span>
                     </a>
@@ -201,8 +201,9 @@
                     </a>
 
                     {{-- Inventory --}}
-                    <a href="#"
-                       class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 font-medium text-gray-400 transition hover:bg-white/5 hover:text-white">
+                    <a href="{{ route('dashboard.inventory') }}"
+                       class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 transition
+                              {{ request()->routeIs('dashboard.inventory') ? 'bg-[#114f8f] text-white shadow-lg shadow-blue-900/20 font-semibold' : 'text-gray-400 hover:bg-white/5 hover:text-white font-medium' }}">
                         <i data-lucide="warehouse" class="h-[18px] w-[18px] shrink-0"></i>
                         <span>Inventory</span>
                     </a>
@@ -232,8 +233,9 @@
                     </div>
 
                     {{-- Returns --}}
-                    <a href="#"
-                       class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 font-medium text-gray-400 transition hover:bg-white/5 hover:text-white">
+                    <a href="{{ route('dashboard.returns') }}"
+                       class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 transition
+                              {{ request()->routeIs('dashboard.returns') ? 'bg-[#114f8f] text-white shadow-lg shadow-blue-900/20 font-semibold' : 'text-gray-400 hover:bg-white/5 hover:text-white font-medium' }}">
                         <i data-lucide="refresh-ccw" class="h-[18px] w-[18px] shrink-0"></i>
                         <span>Returns</span>
                     </a>
@@ -243,23 +245,23 @@
                 <div class="mt-8">
                     <p class="px-3 text-[11px] font-black uppercase tracking-[0.2em] text-gray-500">Sales &amp; Marketing</p>
                     <div class="mt-4 space-y-1">
-                        <a href="#" class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 font-medium text-gray-400 transition hover:bg-white/5 hover:text-white">
+                        <a href="{{ route('dashboard.revenue') }}" class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 transition {{ request()->routeIs('dashboard.revenue') ? 'bg-[#114f8f] text-white shadow-lg shadow-blue-900/20 font-semibold' : 'font-medium text-gray-400 hover:bg-white/5 hover:text-white' }}">
                             <i data-lucide="dollar-sign" class="h-[18px] w-[18px] shrink-0"></i>
                             <span>Revenue</span>
                         </a>
-                        <a href="#" class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 font-medium text-gray-400 transition hover:bg-white/5 hover:text-white">
+                        <a href="{{ route('dashboard.discounts') }}" class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 transition {{ request()->routeIs('dashboard.discounts') ? 'bg-[#114f8f] text-white shadow-lg shadow-blue-900/20 font-semibold' : 'font-medium text-gray-400 hover:bg-white/5 hover:text-white' }}">
                             <i data-lucide="percent" class="h-[18px] w-[18px] shrink-0"></i>
                             <span>Discounts</span>
                         </a>
-                        <a href="#" class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 font-medium text-gray-400 transition hover:bg-white/5 hover:text-white">
+                        <a href="{{ route('dashboard.coupons') }}" class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 transition {{ request()->routeIs('dashboard.coupons') ? 'bg-[#114f8f] text-white shadow-lg shadow-blue-900/20 font-semibold' : 'font-medium text-gray-400 hover:bg-white/5 hover:text-white' }}">
                             <i data-lucide="tag" class="h-[18px] w-[18px] shrink-0"></i>
                             <span>Coupons</span>
                         </a>
-                        <a href="#" class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 font-medium text-gray-400 transition hover:bg-white/5 hover:text-white">
+                        <a href="{{ route('dashboard.transactions') }}" class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 transition {{ request()->routeIs('dashboard.transactions') ? 'bg-[#114f8f] text-white shadow-lg shadow-blue-900/20 font-semibold' : 'font-medium text-gray-400 hover:bg-white/5 hover:text-white' }}">
                             <i data-lucide="credit-card" class="h-[18px] w-[18px] shrink-0"></i>
                             <span>Transactions</span>
                         </a>
-                        <a href="#" class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 font-medium text-gray-400 transition hover:bg-white/5 hover:text-white">
+                        <a href="{{ route('dashboard.reports') }}" class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 transition {{ request()->routeIs('dashboard.reports') ? 'bg-[#114f8f] text-white shadow-lg shadow-blue-900/20 font-semibold' : 'font-medium text-gray-400 hover:bg-white/5 hover:text-white' }}">
                             <i data-lucide="bar-chart-3" class="h-[18px] w-[18px] shrink-0"></i>
                             <span>Reports</span>
                         </a>
@@ -292,7 +294,7 @@
                             </div>
                         </div>
 
-                        <a href="#" class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 font-medium text-gray-400 transition hover:bg-white/5 hover:text-white">
+                        <a href="{{ route('dashboard.reviews') }}" class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 transition {{ request()->routeIs('dashboard.reviews') ? 'bg-[#114f8f] text-white shadow-lg shadow-blue-900/20 font-semibold' : 'font-medium text-gray-400 hover:bg-white/5 hover:text-white' }}">
                             <i data-lucide="star" class="h-[18px] w-[18px] shrink-0"></i>
                             <span>Reviews</span>
                         </a>
@@ -345,12 +347,12 @@
                                           {{ request()->routeIs('dashboard.pages.contact') ? 'text-white font-semibold' : 'text-gray-400' }}">Contact</a>
                             </div>
                         </div>
-                        <a href="#" class="flex w-full items-center justify-between rounded-xl px-3 py-2.5 font-medium text-gray-400 transition hover:bg-white/5 hover:text-white">
+                        <a href="{{ route('dashboard.fulfillment') }}" class="flex w-full items-center justify-between rounded-xl px-3 py-2.5 transition {{ request()->routeIs('dashboard.fulfillment') ? 'bg-[#114f8f] text-white shadow-lg shadow-blue-900/20 font-semibold' : 'font-medium text-gray-400 hover:bg-white/5 hover:text-white' }}">
                             <span class="flex items-center gap-3">
                                 <i data-lucide="boxes" class="h-[18px] w-[18px] shrink-0"></i>
                                 <span>Fulfillment</span>
                             </span>
-                            <i data-lucide="chevron-right" class="h-4 w-4 text-gray-400"></i>
+                            <i data-lucide="chevron-right" class="h-4 w-4 {{ request()->routeIs('dashboard.fulfillment') ? 'text-white' : 'text-gray-400' }}"></i>
                         </a>
                     </div>
                 </div>
@@ -361,9 +363,9 @@
                     <div class="mt-4 space-y-1">
 
                         {{-- System Settings (expandable) --}}
-                        <div x-data="{ open: false }">
+                        <div x-data="{ open: {{ request()->routeIs('dashboard.settings.*') ? 'true' : 'false' }} }">
                             <button @click="open = !open"
-                                    class="flex w-full items-center justify-between rounded-xl px-3 py-2.5 font-medium text-gray-400 transition hover:bg-white/5 hover:text-white">
+                                    class="flex w-full items-center justify-between rounded-xl px-3 py-2.5 font-medium transition {{ request()->routeIs('dashboard.settings.*') ? 'bg-[#114f8f]/30 text-white' : 'text-gray-400 hover:bg-white/5 hover:text-white' }}">
                                 <span class="flex items-center gap-3">
                                     <i data-lucide="settings" class="h-[18px] w-[18px] shrink-0"></i>
                                     <span>System Settings</span>
@@ -376,17 +378,17 @@
                                  x-transition:enter-start="opacity-0 -translate-y-1"
                                  x-transition:enter-end="opacity-100 translate-y-0"
                                  class="ml-9 mt-1 space-y-1 border-l border-gray-800 pl-4">
-                                <a href="#" class="block rounded-lg px-3 py-2 text-[14px] text-gray-400 transition hover:bg-white/5 hover:text-white">General</a>
-                                <a href="#" class="block rounded-lg px-3 py-2 text-[14px] text-gray-400 transition hover:bg-white/5 hover:text-white">Staff Accounts</a>
-                                <a href="#" class="block rounded-lg px-3 py-2 text-[14px] text-gray-400 transition hover:bg-white/5 hover:text-white">Roles &amp; Permissions</a>
-                                <a href="#" class="block rounded-lg px-3 py-2 text-[14px] text-gray-400 transition hover:bg-white/5 hover:text-white">Activities Log</a>
+                                <a href="{{ route('dashboard.settings.general') }}" class="block rounded-lg px-3 py-2 text-[14px] transition hover:bg-white/5 hover:text-white {{ request()->routeIs('dashboard.settings.general') ? 'text-white font-semibold' : 'text-gray-400' }}">General</a>
+                                <a href="{{ route('dashboard.settings.staff') }}" class="block rounded-lg px-3 py-2 text-[14px] transition hover:bg-white/5 hover:text-white {{ request()->routeIs('dashboard.settings.staff') ? 'text-white font-semibold' : 'text-gray-400' }}">Staff Accounts</a>
+                                <a href="{{ route('dashboard.settings.roles') }}" class="block rounded-lg px-3 py-2 text-[14px] transition hover:bg-white/5 hover:text-white {{ request()->routeIs('dashboard.settings.roles') ? 'text-white font-semibold' : 'text-gray-400' }}">Roles & Permissions</a>
+                                <a href="{{ route('dashboard.settings.activities') }}" class="block rounded-lg px-3 py-2 text-[14px] transition hover:bg-white/5 hover:text-white {{ request()->routeIs('dashboard.settings.activities') ? 'text-white font-semibold' : 'text-gray-400' }}">Activities Log</a>
                             </div>
                         </div>
 
                         {{-- Payment Methods (expandable) --}}
-                        <div x-data="{ open: false }">
+                        <div x-data="{ open: {{ request()->routeIs('dashboard.payments.*') ? 'true' : 'false' }} }">
                             <button @click="open = !open"
-                                    class="flex w-full items-center justify-between rounded-xl px-3 py-2.5 font-medium text-gray-400 transition hover:bg-white/5 hover:text-white">
+                                    class="flex w-full items-center justify-between rounded-xl px-3 py-2.5 font-medium transition {{ request()->routeIs('dashboard.payments.*') ? 'bg-[#114f8f]/30 text-white' : 'text-gray-400 hover:bg-white/5 hover:text-white' }}">
                                 <span class="flex items-center gap-3">
                                     <i data-lucide="credit-card" class="h-[18px] w-[18px] shrink-0"></i>
                                     <span>Payment Methods</span>
@@ -399,8 +401,8 @@
                                  x-transition:enter-start="opacity-0 -translate-y-1"
                                  x-transition:enter-end="opacity-100 translate-y-0"
                                  class="ml-9 mt-1 space-y-1 border-l border-gray-800 pl-4">
-                                <a href="#" class="block rounded-lg px-3 py-2 text-[14px] text-gray-400 transition hover:bg-white/5 hover:text-white">Gateways</a>
-                                <a href="#" class="block rounded-lg px-3 py-2 text-[14px] text-gray-400 transition hover:bg-white/5 hover:text-white">Bank Details</a>
+                                <a href="{{ route('dashboard.payments.gateways') }}" class="block rounded-lg px-3 py-2 text-[14px] transition hover:bg-white/5 hover:text-white {{ request()->routeIs('dashboard.payments.gateways') ? 'text-white font-semibold' : 'text-gray-400' }}">Gateways</a>
+                                <a href="{{ route('dashboard.payments.bank-details') }}" class="block rounded-lg px-3 py-2 text-[14px] transition hover:bg-white/5 hover:text-white {{ request()->routeIs('dashboard.payments.bank-details') ? 'text-white font-semibold' : 'text-gray-400' }}">Bank Details</a>
                             </div>
                         </div>
 
@@ -412,9 +414,15 @@
             {{-- Sidebar user footer --}}
             <div class="border-t border-white/5 bg-black/20 px-6 py-5">
                 <div class="flex items-center gap-3">
-                    <img src="https://i.pravatar.cc/80?img=12"
-                         alt="Admin"
-                         class="h-11 w-11 rounded-full object-cover ring-2 ring-[#f6c400]" />
+                    @if (session('admin_profile.avatar'))
+                        <img src="{{ session('admin_profile.avatar') }}"
+                             alt="{{ session('admin_profile.fullName', 'Admin') }}"
+                             class="h-11 w-11 rounded-full object-cover ring-2 ring-[#f6c400]" />
+                    @else
+                        <div class="flex h-11 w-11 items-center justify-center rounded-full bg-[#114f8f] text-sm font-black uppercase text-white ring-2 ring-[#f6c400]">
+                            {{ strtoupper(substr(session('admin_profile.fullName', 'Admin'), 0, 1)) }}
+                        </div>
+                    @endif
                     <div class="min-w-0 flex-1">
                         <div class="truncate text-[15px] font-bold text-white">
                             {{ session('admin_profile.fullName', 'Admin') }}
@@ -509,17 +517,6 @@
                             Create Offer
                         </a>
 
-                        <div class="mx-1 hidden h-8 w-px bg-gray-200 md:block"></div>
-
-                        <button class="flex h-11 w-11 items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-500 transition-all hover:border-gray-300 hover:text-[#111827]">
-                            <i data-lucide="bell" class="h-[18px] w-[18px]"></i>
-                        </button>
-                        <button class="flex h-11 w-11 items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-500 transition-all hover:border-gray-300 hover:text-[#111827]">
-                            <i data-lucide="settings" class="h-[18px] w-[18px]"></i>
-                        </button>
-                        <button class="flex h-11 w-11 items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-500 transition-all hover:border-gray-300 hover:text-[#111827]">
-                            <i data-lucide="moon" class="h-[18px] w-[18px]"></i>
-                        </button>
 
                         <div x-data="{ open: false }"
                              @mouseenter="open = true"
@@ -612,10 +609,9 @@
             };
         }
 
-        // Global base URL — derived from the browser's own origin so it always
-        // matches the protocol (http vs https) and host, regardless of how the
-        // server-side APP_URL or cPanel reverse-proxy headers are configured.
-        window.API_BASE = window.location.origin;
+        // Global base URL — used by all pages so relative /api/ paths work regardless
+        // of how the app is deployed on cPanel (subdomain, subdirectory, etc.)
+        window.API_BASE = '{{ rtrim(url('/'), '/') }}';
 
         document.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();

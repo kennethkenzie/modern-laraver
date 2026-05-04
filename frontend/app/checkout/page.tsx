@@ -11,6 +11,7 @@ import {
   type CartItem,
 } from "@/lib/cart";
 import { getCurrentUser, isLoggedIn, updateCurrentUser } from "@/lib/auth";
+import { placeOrder, type StorefrontOrder } from "@/lib/orders";
 import { useFrontendData } from "@/lib/use-frontend-data";
 
 export default function CheckoutPage() {
@@ -26,6 +27,9 @@ export default function CheckoutPage() {
   const [fulfillmentMethod, setFulfillmentMethod] = useState<"delivery" | "pickup">("delivery");
   const [selectedPickupId, setSelectedPickupId] = useState("");
   const [placed, setPlaced] = useState(false);
+  const [placedOrder, setPlacedOrder] = useState<StorefrontOrder | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [orderError, setOrderError] = useState("");
 
   const pickupLocations = useMemo(
     () => (data.pickupLocations || []).filter((location) => location.isActive),
@@ -96,6 +100,11 @@ export default function CheckoutPage() {
                 ? `Your order has been placed successfully. Pickup is set for ${selectedPickupLocation.title}, ${selectedPickupLocation.city}.`
                 : "Your checkout has been completed successfully. We will contact you using your saved details."}
             </p>
+            {placedOrder ? (
+              <p className="mt-3 text-sm font-semibold text-[#111827]">
+                Order number: {placedOrder.number}
+              </p>
+            ) : null}
             <div className="mt-6 flex gap-3">
               <Link href="/" className="rounded-xl bg-[#111827] px-5 py-3 text-sm font-semibold text-white">
                 Continue shopping
@@ -256,7 +265,38 @@ export default function CheckoutPage() {
 
               <button
                 type="button"
-                onClick={() => {
+                onClick={async () => {
+                  setSubmitting(true);
+                  setOrderError("");
+                  try {
+                    const order = await placeOrder({
+                      customer: {
+                        fullName,
+                        email,
+                        phone,
+                        address: fulfillmentMethod === "pickup" ? selectedPickupLocation?.addressLine1 || address : address,
+                        city: fulfillmentMethod === "pickup" ? selectedPickupLocation?.city || city : city,
+                        country: fulfillmentMethod === "pickup" ? selectedPickupLocation?.country || country : country,
+                      },
+                      fulfillmentMethod,
+                      paymentMethod,
+                      pickupLocation: selectedPickupLocation ?? undefined,
+                      items,
+                      subtotal,
+                      shipping,
+                      total,
+                    });
+
+                    setPlacedOrder(order);
+                    clearCart();
+                    setItems([]);
+                    setPlaced(true);
+                  } catch (error) {
+                    setOrderError(error instanceof Error ? error.message : "Failed to place order.");
+                  } finally {
+                    setSubmitting(false);
+                  }
+
                   updateCurrentUser({
                     fullName,
                     email,
@@ -265,15 +305,18 @@ export default function CheckoutPage() {
                     city: fulfillmentMethod === "pickup" ? selectedPickupLocation?.city || city : city,
                     country: fulfillmentMethod === "pickup" ? selectedPickupLocation?.country || country : country,
                   });
-                  clearCart();
-                  setItems([]);
-                  setPlaced(true);
                 }}
-                disabled={fulfillmentMethod === "pickup" && !selectedPickupLocation}
+                disabled={submitting || (fulfillmentMethod === "pickup" && !selectedPickupLocation)}
                 className="mt-6 w-full rounded-full bg-[#111827] px-4 py-3 text-sm font-semibold text-white hover:bg-black"
               >
-                Place order
+                {submitting ? "Placing order..." : "Place order"}
               </button>
+
+              {orderError ? (
+                <p className="mt-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                  {orderError}
+                </p>
+              ) : null}
 
               <Link href="/cart" className="mt-3 block text-center text-sm font-medium text-[#0b63ce] hover:underline">
                 Back to cart

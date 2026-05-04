@@ -1,8 +1,36 @@
+"use client";
+
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import NavBar from "@/components/NavBar";
 import Footer from "@/components/Footer";
+import { getCurrentUser, updateCurrentUser } from "@/lib/auth";
 
 export default function ProfilePage() {
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [address, setAddress] = useState("");
+  const [city, setCity] = useState("");
+  const [country, setCountry] = useState("Uganda");
+  const [saved, setSaved] = useState(false);
+
+  useEffect(() => {
+    const user = getCurrentUser();
+    setFullName(user?.fullName || "");
+    setEmail(user?.email || "");
+    setPhone(user?.phone || "");
+    setAddress(user?.address || "");
+    setCity(user?.city || "");
+    setCountry(user?.country || "Uganda");
+  }, []);
+
+  function saveProfile() {
+    updateCurrentUser({ fullName, email, phone, address, city, country });
+    setSaved(true);
+    window.setTimeout(() => setSaved(false), 2200);
+  }
+
   return (
     <main className="min-h-screen bg-[#f8fafc]">
       <NavBar />
@@ -28,23 +56,23 @@ export default function ProfilePage() {
           <section className="rounded-3xl border border-[#e5e7eb] bg-white p-6 shadow-sm">
             <h2 className="text-xl font-semibold text-[#111827]">Edit details</h2>
             <div className="mt-6 grid gap-4 md:grid-cols-2">
-              <ProfileField label="First name" value="Kenneth" />
-              <ProfileField label="Last name" value="Nsubuga" />
-              <ProfileField label="Email" value="kenneth@example.com" />
-              <ProfileField label="Phone" value="+256 700 000 000" />
+              <ProfileField label="Full name" value={fullName} onChange={setFullName} />
+              <ProfileField label="Email" value={email} onChange={setEmail} />
+              <ProfileField label="Phone" value={phone} onChange={setPhone} />
               <div className="md:col-span-2">
-                <ProfileField label="Address" value="Plot 14, Kampala Road, Kampala" />
+                <ProfileField label="Address" value={address} onChange={setAddress} />
               </div>
-              <ProfileField label="City" value="Kampala" />
-              <ProfileField label="Country" value="Uganda" />
+              <ProfileField label="City" value={city} onChange={setCity} />
+              <ProfileField label="Country" value={country} onChange={setCountry} />
             </div>
 
             <div className="mt-6 flex flex-wrap gap-3">
-              <button className="rounded-xl bg-[#111827] px-5 py-3 text-sm font-semibold text-white">
-                Save changes
-              </button>
-              <button className="rounded-xl border border-[#d1d5db] bg-white px-5 py-3 text-sm font-semibold text-[#111827]">
-                Cancel
+              <button
+                type="button"
+                onClick={saveProfile}
+                className="rounded-xl bg-[#111827] px-5 py-3 text-sm font-semibold text-white"
+              >
+                {saved ? "Saved" : "Save changes"}
               </button>
             </div>
           </section>
@@ -54,9 +82,9 @@ export default function ProfilePage() {
               <h2 className="text-xl font-semibold text-[#111827]">Account status</h2>
               <div className="mt-5 space-y-4 text-sm">
                 <InfoRow label="Membership" value="Customer" />
-                <InfoRow label="Email status" value="Verified" />
-                <InfoRow label="Phone status" value="Pending confirmation" />
-                <InfoRow label="Last update" value="Today" />
+                <InfoRow label="Email" value={email || "Not set"} />
+                <InfoRow label="Phone" value={phone || "Not set"} />
+                <InfoRow label="Address" value={[address, city, country].filter(Boolean).join(", ") || "Not set"} />
               </div>
             </section>
 
@@ -77,12 +105,21 @@ export default function ProfilePage() {
   );
 }
 
-function ProfileField({ label, value }: { label: string; value: string }) {
+function ProfileField({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+}) {
   return (
     <label className="block">
       <span className="mb-2 block text-sm font-semibold text-[#374151]">{label}</span>
       <input
-        defaultValue={value}
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
         className="h-11 w-full rounded-xl border border-[#d1d5db] px-4 text-sm text-[#111827] outline-none focus:border-[#0b63ce]"
       />
     </label>

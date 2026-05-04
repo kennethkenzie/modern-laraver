@@ -7,6 +7,7 @@ import NavBar from "@/components/NavBar";
 import Footer from "@/components/Footer";
 import { getCurrentUser, isLoggedIn } from "@/lib/auth";
 import { cartCount } from "@/lib/cart";
+import { fetchOrders, type StorefrontOrder } from "@/lib/orders";
 import { readWishlist } from "@/lib/wishlist";
 
 type AccountTile = {
@@ -17,38 +18,6 @@ type AccountTile = {
   icon: React.ReactNode;
 };
 
-type RecentOrder = {
-  id: string;
-  title: string;
-  status: string;
-  total: string;
-  date: string;
-};
-
-const recentOrders: RecentOrder[] = [
-  {
-    id: "ME-2084",
-    title: "Hisense main board replacement",
-    status: "Delivered",
-    total: "UGX 185,000",
-    date: "Delivered on March 18",
-  },
-  {
-    id: "ME-2067",
-    title: "Universal TV remote and HDMI cable",
-    status: "Shipped",
-    total: "UGX 52,000",
-    date: "Arriving Monday",
-  },
-  {
-    id: "ME-2051",
-    title: "Digital multimeter toolkit bundle",
-    status: "Processing",
-    total: "UGX 96,000",
-    date: "Placed yesterday",
-  },
-];
-
 export default function UserPage() {
   const [mounted, setMounted] = useState(false);
   const [loggedIn, setLoggedIn] = useState(false);
@@ -57,6 +26,9 @@ export default function UserPage() {
   const [userName, setUserName] = useState("Customer");
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
+  const [orders, setOrders] = useState<StorefrontOrder[]>([]);
+  const [ordersLoading, setOrdersLoading] = useState(false);
+  const [ordersError, setOrdersError] = useState("");
 
   useEffect(() => {
     const sync = () => {
@@ -74,15 +46,45 @@ export default function UserPage() {
     window.addEventListener("auth:updated", sync);
     window.addEventListener("cart:updated", sync);
     window.addEventListener("wishlist:updated", sync);
+    window.addEventListener("orders:updated", sync);
     window.addEventListener("storage", sync);
 
     return () => {
       window.removeEventListener("auth:updated", sync);
       window.removeEventListener("cart:updated", sync);
       window.removeEventListener("wishlist:updated", sync);
+      window.removeEventListener("orders:updated", sync);
       window.removeEventListener("storage", sync);
     };
   }, []);
+
+  useEffect(() => {
+    if (!loggedIn) {
+      setOrders([]);
+      return;
+    }
+
+    let cancelled = false;
+    setOrdersLoading(true);
+    setOrdersError("");
+
+    fetchOrders()
+      .then((nextOrders) => {
+        if (!cancelled) setOrders(nextOrders);
+      })
+      .catch((error) => {
+        if (!cancelled) {
+          setOrdersError(error instanceof Error ? error.message : "Failed to load orders.");
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setOrdersLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [loggedIn]);
 
   const firstName = useMemo(() => userName.split(" ")[0] || "Customer", [userName]);
   const initials = useMemo(
@@ -99,7 +101,7 @@ export default function UserPage() {
   const accountTiles: AccountTile[] = [
     {
       title: "Your Orders",
-      description: "Track packages, review recent purchases, and buy again quickly.",
+      description: `${orders.length} order${orders.length === 1 ? "" : "s"} saved to your account.`,
       href: "/user",
       cta: "View orders",
       icon: <Package className="h-6 w-6 text-[#111827]" />,
@@ -252,20 +254,42 @@ export default function UserPage() {
                 </div>
 
                 <div className="mt-5 overflow-hidden rounded-[8px] border border-[#e7e7e7]">
-                  {recentOrders.map((order, index) => (
-                    <div
-                      key={order.id}
-                      className={`grid gap-3 px-4 py-4 md:grid-cols-[120px_minmax(0,1fr)_120px_140px] ${index ? "border-t border-[#e7e7e7]" : ""}`}
-                    >
-                      <div className="text-[13px] font-bold text-[#0f1111]">{order.id}</div>
-                      <div>
-                        <div className="text-[14px] font-medium text-[#0f1111]">{order.title}</div>
-                        <div className="mt-1 text-[13px] text-[#565959]">{order.date}</div>
+                  {ordersLoading ? (
+                    <div className="px-4 py-8 text-center text-[14px] text-[#565959]">Loading your orders...</div>
+                  ) : ordersError ? (
+                    <div className="px-4 py-8 text-center text-[14px] text-[#b12704]">{ordersError}</div>
+                  ) : orders.length > 0 ? (
+                    orders.map((order, index) => (
+                      <div
+                        key={order.id}
+                        className={`grid gap-3 px-4 py-4 md:grid-cols-[140px_minmax(0,1fr)_120px_140px] ${index ? "border-t border-[#e7e7e7]" : ""}`}
+                      >
+                        <div className="text-[13px] font-bold text-[#0f1111]">{order.number}</div>
+                        <div>
+                          <div className="text-[14px] font-medium text-[#0f1111]">
+                            {order.items.map((item) => item.name).slice(0, 2).join(", ") || "Order items"}
+                          </div>
+                          <div className="mt-1 text-[13px] text-[#565959]">
+                            Placed {formatDate(order.placedAt)}
+                          </div>
+                        </div>
+                        <div className="text-[13px] font-medium text-[#007600]">{formatStatus(order.status)}</div>
+                        <div className="text-[14px] font-bold text-[#0f1111]">
+                          UGX {order.total.toLocaleString("en-US")}
+                        </div>
                       </div>
-                      <div className="text-[13px] font-medium text-[#007600]">{order.status}</div>
-                      <div className="text-[14px] font-bold text-[#0f1111]">{order.total}</div>
+                    ))
+                  ) : (
+                    <div className="px-4 py-10 text-center">
+                      <div className="text-[15px] font-bold text-[#0f1111]">No orders yet</div>
+                      <p className="mt-2 text-[14px] text-[#565959]">
+                        Orders you place at checkout will show here.
+                      </p>
+                      <Link href="/" className="mt-4 inline-flex rounded-full bg-[#ffd814] px-4 py-2 text-[13px] font-medium text-[#0f1111]">
+                        Start shopping
+                      </Link>
                     </div>
-                  ))}
+                  )}
                 </div>
               </div>
 
@@ -303,6 +327,22 @@ export default function UserPage() {
       <Footer />
     </main>
   );
+}
+
+function formatDate(value: string) {
+  if (!value) return "recently";
+  return new Intl.DateTimeFormat("en-UG", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  }).format(new Date(value));
+}
+
+function formatStatus(value: string) {
+  return value
+    .split("_")
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
 }
 
 function SnapshotRow({ label, value }: { label: string; value: string }) {

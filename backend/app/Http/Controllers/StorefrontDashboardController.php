@@ -28,6 +28,8 @@ class StorefrontDashboardController extends Controller
             'logoAlt' => ['nullable', 'string', 'max:255'],
             'faviconUrl' => ['nullable', 'string', 'max:2048'],
             'searchPlaceholder' => ['nullable', 'string', 'max:255'],
+            'showMarquee' => ['nullable', 'boolean'],
+            'marqueeText' => ['nullable', 'string'],
             'topLinks' => ['array'],
             'topLinks.*.label' => ['nullable', 'string', 'max:255'],
             'topLinks.*.href' => ['nullable', 'string', 'max:255'],
@@ -87,6 +89,8 @@ class StorefrontDashboardController extends Controller
                 'siteTitle' => 'Modern Electronics',
                 'faviconUrl' => '/favicon.ico',
                 'searchPlaceholder' => 'Search here...',
+                'showMarquee' => true,
+                'marqueeText' => 'HOT SALE 🔥 | MODERN ELECTRONICS LTD Trusted Electronics Experts Since 1998! Get quality electronics, appliances, accessories, and reliable tech solutions from Modern Electronics Ltd. Affordable Prices • Genuine Products • Trusted Service • Visit us today and upgrade your lifestyle with modern technology.',
                 'topLinks' => [
                     ['label' => 'Home', 'href' => '/', 'icon' => 'home'],
                     ['label' => 'About Us', 'href' => '/about', 'icon' => 'info'],

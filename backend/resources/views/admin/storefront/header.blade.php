@@ -70,6 +70,24 @@
                             </div>
                             <input x-ref="faviconInput" type="file" class="hidden" accept="image/*,.ico,.svg" @change="uploadAsset($event, 'faviconUrl')">
                         </label>
+
+                        <div class="block md:col-span-2 rounded-2xl border border-gray-200 bg-[#f8fbff] p-4">
+                            <label class="flex items-start justify-between gap-4">
+                                <div>
+                                    <span class="block text-[11px] font-black uppercase tracking-[0.18em] text-gray-400">Top Bar Marquee</span>
+                                    <p class="mt-2 text-xs font-medium text-gray-500">Enable or disable the red scrolling announcement bar above the navbar.</p>
+                                </div>
+                                <button type="button" @click="form.showMarquee = !form.showMarquee" :class="form.showMarquee ? 'bg-[#114f8f]' : 'bg-gray-300'" class="relative inline-flex h-7 w-14 shrink-0 rounded-full transition-colors">
+                                    <span :class="form.showMarquee ? 'translate-x-7' : 'translate-x-1'" class="mt-1 inline-block h-5 w-5 rounded-full bg-white shadow transition-transform"></span>
+                                </button>
+                            </label>
+                        </div>
+
+                        <label class="block md:col-span-2">
+                            <span class="mb-2 block text-[11px] font-black uppercase tracking-[0.18em] text-gray-400">Top Bar Marquee Text</span>
+                            <textarea x-model="form.marqueeText" rows="5" class="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm font-semibold leading-6 text-[#111827] outline-none transition focus:border-[#114f8f] focus:ring-4 focus:ring-blue-50" placeholder="Enter the scrolling announcement text shown above the navbar."></textarea>
+                            <p class="mt-2 text-xs font-medium text-gray-500">This text appears in the red scrolling bar at the top of the storefront.</p>
+                        </label>
                     </div>
                 </section>
 
@@ -141,6 +159,12 @@
                 </div>
 
                 <div class="mt-6 overflow-hidden rounded-2xl border border-gray-200 bg-[#f8fbff]">
+                    <template x-if="form.showMarquee && form.marqueeText">
+                        <div class="border-b border-gray-200 bg-[#d62828] px-5 py-3 text-[11px] font-black uppercase tracking-[0.12em] text-white">
+                            <div class="truncate" x-text="form.marqueeText"></div>
+                        </div>
+                    </template>
+
                     <div class="border-b border-gray-200 bg-[#111827] px-5 py-3 text-white">
                         <div class="flex flex-wrap gap-3 text-[11px] font-black uppercase tracking-[0.12em]">
                             <template x-for="(link, index) in form.topLinks" :key="`preview-top-${index}`">
@@ -192,6 +216,8 @@
                     logoAlt: '',
                     faviconUrl: '',
                     searchPlaceholder: '',
+                    showMarquee: true,
+                    marqueeText: '',
                     topLinks: [],
                     quickLinks: [],
                 },
@@ -202,6 +228,7 @@
                 init() {
                     const raw = document.getElementById('navbar-json')?.textContent || '{}';
                     this.form = Object.assign(this.form, JSON.parse(raw));
+                    this.form.showMarquee = this.form.showMarquee !== false;
                     this.form.topLinks = Array.isArray(this.form.topLinks) ? this.form.topLinks : [];
                     this.form.quickLinks = Array.isArray(this.form.quickLinks) ? this.form.quickLinks : [];
                     this.refreshIcons();

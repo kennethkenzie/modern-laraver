@@ -46,4 +46,9 @@ class Profile extends Model implements AuthenticatableContract
     {
         return $this->hasMany(Wishlist::class, 'user_id');
     }
+
+    public function orders(): HasMany
+    {
+        return $this->hasMany(Order::class);
+    }
 }

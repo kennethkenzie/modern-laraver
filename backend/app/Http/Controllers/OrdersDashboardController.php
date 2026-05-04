@@ -2,57 +2,58 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Order;
+use App\Models\Product;
+use App\Models\Profile;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Collection;
 
 class OrdersDashboardController extends Controller
 {
     public function index()
     {
-        $orders = collect();
-        $todayOrders = collect();
-        $deliveredOrders = collect();
-        $pendingOrders = collect();
-        $issuesCount = 0;
+        $orders = Order::with(['profile', 'items'])
+            ->latest()
+            ->limit(50)
+            ->get();
 
-        $paymentBreakdown = [
-            ['label' => 'Paid', 'count' => 0, 'tone' => 'green'],
-            ['label' => 'Pending', 'count' => 0, 'tone' => 'amber'],
-            ['label' => 'Failed', 'count' => 0, 'tone' => 'red'],
-            ['label' => 'Refunded', 'count' => 0, 'tone' => 'slate'],
-        ];
+        $pendingCount = Order::where('status', 'pending')->count();
+        $todayCount = Order::whereDate('created_at', today())->count();
+        $revenue = Order::sum('total');
 
-        $fulfillmentQueues = [
-            ['label' => 'Ready to pack', 'count' => 0, 'icon' => 'package', 'tone' => 'amber'],
-            ['label' => 'In processing', 'count' => 0, 'icon' => 'loader-circle', 'tone' => 'blue'],
-            ['label' => 'Out for shipping', 'count' => 0, 'icon' => 'truck', 'tone' => 'indigo'],
-            ['label' => 'Delivered', 'count' => 0, 'icon' => 'badge-check', 'tone' => 'green'],
+        $cards = [
+            ['label' => 'Total Orders', 'value' => number_format(Order::count()), 'note' => 'Orders placed through the storefront checkout.'],
+            ['label' => 'Pending', 'value' => number_format($pendingCount), 'note' => 'Orders waiting for staff review or fulfillment.'],
+            ['label' => 'Today', 'value' => number_format($todayCount), 'note' => 'New orders received today.'],
+            ['label' => 'Order Revenue', 'value' => 'UGX ' . number_format((float) $revenue, 0), 'note' => 'Gross order value before payment reconciliation.'],
         ];
 
         return view('admin.orders.index', [
+            'cards' => $cards,
             'orders' => $orders,
-            'totalOrders' => $orders->count(),
-            'todayOrderCount' => $todayOrders->count(),
-            'pendingOrdersCount' => $pendingOrders->count(),
-            'deliveredOrdersCount' => $deliveredOrders->count(),
-            'issuesCount' => $issuesCount,
-            'totalRevenueLabel' => 'UGX 0',
-            'todayRevenueLabel' => 'UGX 0',
-            'paymentBreakdown' => $paymentBreakdown,
-            'fulfillmentQueues' => $fulfillmentQueues,
-            'recentEvents' => collect(),
-            'profile' => session('admin_profile'),
+            'customerCount' => Profile::where('role', 'customer')->count(),
+            'publishedProducts' => Product::where('is_published', true)->count(),
         ]);
     }
 
     public function show(string $id)
     {
-        abort(404);
+        $order = Order::with(['profile', 'items'])->findOrFail($id);
+
+        return view('admin.orders.show', [
+            'order' => $order,
+        ]);
     }
 
     public function updateStatus(Request $request, string $id): JsonResponse
     {
-        return response()->json(['error' => 'Order not found.'], 404);
+        $data = $request->validate([
+            'status' => 'required|in:pending,processing,ready,shipped,delivered,cancelled',
+        ]);
+
+        $order = Order::findOrFail($id);
+        $order->update(['status' => $data['status']]);
+
+        return response()->json(['ok' => true, 'status' => $order->status]);
     }
 }

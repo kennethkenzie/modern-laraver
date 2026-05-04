@@ -53,7 +53,7 @@ class AdminProductController extends Controller
         $first         = $validVariants[0];
 
         $storeId    = $this->getDefaultStoreId();
-        $categoryId = $this->getCategoryId($body['categoryName'] ?? null);
+        $categoryId = $this->getCategoryId($body['categoryName'] ?? null, $body['categoryId'] ?? null);
 
         $product = Product::create([
             'id'                    => (string) Str::uuid(),
@@ -156,6 +156,7 @@ class AdminProductController extends Controller
                 'id'                    => $product->id,
                 'name'                  => $product->name,
                 'slug'                  => $product->slug,
+                'categoryId'            => $product->category_id,
                 'category'              => $product->category?->name ?? 'Select Category',
                 'brand'                 => $product->brand ?? 'Select Brand',
                 'currencyCode'          => $product->currency_code,
@@ -229,7 +230,7 @@ class AdminProductController extends Controller
         $validVariants = array_values($validVariants);
         $first         = $validVariants[0];
 
-        $categoryId = $this->getCategoryId($body['categoryName'] ?? null);
+        $categoryId = $this->getCategoryId($body['categoryName'] ?? null, $body['categoryId'] ?? null);
 
         $product->update([
             'category_id'           => $categoryId,
@@ -494,8 +495,12 @@ class AdminProductController extends Controller
         return $store->id;
     }
 
-    private function getCategoryId(?string $name): ?string
+    private function getCategoryId(?string $name, ?string $id = null): ?string
     {
+        if ($id && Category::where('id', $id)->exists()) {
+            return $id;
+        }
+
         if (! $name || $name === 'Select Category') {
             return null;
         }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use App\Models\Product;
+use Illuminate\Http\Request;
 
 class ProductsDashboardController extends Controller
 {
@@ -41,15 +42,24 @@ class ProductsDashboardController extends Controller
         return view('admin.products.index', compact('products', 'profile'));
     }
 
-    public function add()
+    public function add(Request $request)
     {
-        $categories = Category::orderBy('name')
-            ->get(['id', 'name'])
-            ->map(fn ($c) => ['id' => $c->id, 'name' => $c->name]);
+        $categories = Category::orderBy('featured_sort_order')
+            ->orderBy('name')
+            ->get(['id', 'parent_id', 'name', 'featured_sort_order', 'is_active'])
+            ->map(fn ($c) => [
+                'id'       => $c->id,
+                'parentId' => $c->parent_id,
+                'name'     => $c->name,
+                'order'    => (int) $c->featured_sort_order,
+                'isActive' => (bool) $c->is_active,
+            ])
+            ->values();
 
         $profile = session('admin_profile');
+        $editId = $request->query('edit');
 
-        return view('admin.products.add', compact('categories', 'profile'));
+        return view('admin.products.add', compact('categories', 'profile', 'editId'));
     }
 
     public function show(string $id)

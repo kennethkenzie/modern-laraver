@@ -9,6 +9,7 @@ use App\Http\Controllers\ExportDashboardController;
 use App\Http\Controllers\ImportDashboardController;
 use App\Http\Controllers\MessagesDashboardController;
 use App\Http\Controllers\OffersDashboardController;
+use App\Http\Controllers\OperationsDashboardController;
 use App\Http\Controllers\OrdersDashboardController;
 use App\Http\Controllers\PagesDashboardController;
 use App\Http\Controllers\ProfileDashboardController;
@@ -68,6 +69,24 @@ Route::middleware('web.dashboard')->group(function () {
     Route::get('/dashboard/products/{id}', [ProductsDashboardController::class, 'show'])->name('dashboard.products.show');
 
     Route::get('/dashboard/offers', [OffersDashboardController::class, 'index'])->name('dashboard.offers');
+
+    Route::get('/dashboard/inventory', [OperationsDashboardController::class, 'inventory'])->name('dashboard.inventory');
+    Route::get('/dashboard/returns', [OperationsDashboardController::class, 'returns'])->name('dashboard.returns');
+    Route::get('/dashboard/revenue', [OperationsDashboardController::class, 'revenue'])->name('dashboard.revenue');
+    Route::get('/dashboard/discounts', [OperationsDashboardController::class, 'discounts'])->name('dashboard.discounts');
+    Route::get('/dashboard/coupons', [OperationsDashboardController::class, 'coupons'])->name('dashboard.coupons');
+    Route::get('/dashboard/transactions', [OperationsDashboardController::class, 'transactions'])->name('dashboard.transactions');
+    Route::get('/dashboard/reports', [OperationsDashboardController::class, 'reports'])->name('dashboard.reports');
+    Route::get('/dashboard/reviews', [OperationsDashboardController::class, 'reviews'])->name('dashboard.reviews');
+    Route::get('/dashboard/fulfillment', [OperationsDashboardController::class, 'fulfillment'])->name('dashboard.fulfillment');
+
+    Route::get('/dashboard/settings/general', [OperationsDashboardController::class, 'generalSettings'])->name('dashboard.settings.general');
+    Route::get('/dashboard/settings/staff-accounts', [OperationsDashboardController::class, 'staffAccounts'])->name('dashboard.settings.staff');
+    Route::get('/dashboard/settings/roles-permissions', [OperationsDashboardController::class, 'rolesPermissions'])->name('dashboard.settings.roles');
+    Route::get('/dashboard/settings/activities-log', [OperationsDashboardController::class, 'activityLog'])->name('dashboard.settings.activities');
+
+    Route::get('/dashboard/payments/gateways', [OperationsDashboardController::class, 'paymentGateways'])->name('dashboard.payments.gateways');
+    Route::get('/dashboard/payments/bank-details', [OperationsDashboardController::class, 'bankDetails'])->name('dashboard.payments.bank-details');
 
     // Customers
     Route::get('/dashboard/customers', [CustomersDashboardController::class, 'index'])->name('dashboard.customers');

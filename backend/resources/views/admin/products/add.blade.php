@@ -5,13 +5,18 @@
 @section('content')
 <div
     class="-mx-4 -mt-4 sm:-mx-6 sm:-mt-6 min-h-screen bg-[#eaeded] px-4 pt-4 pb-16 sm:px-6 sm:pt-6"
-    x-data="addProductApp('{{ session('admin_token') }}')"
+    x-data="addProductApp('{{ session('admin_token') }}', @js($categories), @js($editId))"
     x-init="init()"
 >
     {{-- Header --}}
     <div class="mb-5">
-        <h1 class="text-[22px] font-bold text-[#0f1111]">Add New Product</h1>
-        <p class="mt-0.5 text-[13px] text-[#565959]">Fill in the information below to register a new product.</p>
+        <h1 class="text-[22px] font-bold text-[#0f1111]" x-text="editId ? 'Edit Product' : 'Add New Product'">Add New Product</h1>
+        <p class="mt-0.5 text-[13px] text-[#565959]" x-text="editId ? 'Update the saved product information below.' : 'Fill in the information below to register a new product.'"></p>
+    </div>
+
+    <div x-show="isLoadingProduct" x-cloak class="mb-4 flex items-center gap-2 rounded-md border border-[#d5d9d9] bg-white px-4 py-3 text-[13px] text-[#565959]">
+        <i data-lucide="loader-2" class="h-4 w-4 animate-spin"></i>
+        Loading product information...
     </div>
 
     {{-- Tab nav --}}
@@ -49,16 +54,46 @@
                 <div class="grid gap-4 md:grid-cols-2">
                     <div>
                         <label class="mb-1.5 block text-[13px] font-bold text-[#0f1111]">Category <span class="text-[#b12704]">*</span></label>
-                        <div class="relative">
-                            <select x-model="form.category"
-                                :class="form.category === 'Select Category' ? 'text-[#8a8f98]' : 'text-[#0f1111]'"
-                                class="h-10 w-full appearance-none rounded-md border border-[#a6a6a6] bg-white px-3 pr-10 text-[14px] outline-none focus:border-[#007185] transition">
-                                <option value="Select Category">Select Category</option>
-                                @foreach($categories as $cat)
-                                    <option value="{{ $cat['name'] }}">{{ $cat['name'] }}</option>
-                                @endforeach
-                            </select>
-                            <i data-lucide="chevron-down" class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#565959]"></i>
+                        <div class="grid gap-3">
+                            <div class="relative">
+                                <select x-model="form.mainCategoryId" @change="selectMainCategory()"
+                                    :class="form.mainCategoryId === '' ? 'text-[#8a8f98]' : 'text-[#0f1111]'"
+                                    class="h-10 w-full appearance-none rounded-md border border-[#a6a6a6] bg-white px-3 pr-10 text-[14px] outline-none focus:border-[#007185] transition">
+                                    <option value="">Select main category</option>
+                                    <template x-for="category in mainCategories" :key="category.id">
+                                        <option :value="category.id" x-text="category.name"></option>
+                                    </template>
+                                </select>
+                                <i data-lucide="chevron-down" class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#565959]"></i>
+                            </div>
+
+                            <div class="relative" x-show="subCategories.length > 0" x-cloak>
+                                <select x-model="form.subCategoryId" @change="selectSubCategory()"
+                                    :class="form.subCategoryId === '' ? 'text-[#8a8f98]' : 'text-[#0f1111]'"
+                                    class="h-10 w-full appearance-none rounded-md border border-[#a6a6a6] bg-white px-3 pr-10 text-[14px] outline-none focus:border-[#007185] transition">
+                                    <option value="">Select subcategory</option>
+                                    <template x-for="category in subCategories" :key="category.id">
+                                        <option :value="category.id" x-text="category.name"></option>
+                                    </template>
+                                </select>
+                                <i data-lucide="chevron-down" class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#565959]"></i>
+                            </div>
+
+                            <div class="relative" x-show="subSubCategories.length > 0" x-cloak>
+                                <select x-model="form.subSubCategoryId" @change="selectSubSubCategory()"
+                                    :class="form.subSubCategoryId === '' ? 'text-[#8a8f98]' : 'text-[#0f1111]'"
+                                    class="h-10 w-full appearance-none rounded-md border border-[#a6a6a6] bg-white px-3 pr-10 text-[14px] outline-none focus:border-[#007185] transition">
+                                    <option value="">Select sub-subcategory</option>
+                                    <template x-for="category in subSubCategories" :key="category.id">
+                                        <option :value="category.id" x-text="category.name"></option>
+                                    </template>
+                                </select>
+                                <i data-lucide="chevron-down" class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#565959]"></i>
+                            </div>
+
+                            <p class="text-[12px] text-[#565959]" x-show="selectedCategoryName" x-cloak>
+                                Selected: <span class="font-semibold text-[#0f1111]" x-text="selectedCategoryPath"></span>
+                            </p>
                         </div>
                     </div>
                     <div>
@@ -485,15 +520,15 @@
         <div class="flex items-center justify-between gap-3">
             <a href="{{ route('dashboard.products') }}" class="text-[13px] font-bold text-[#565959] hover:text-[#0f1111] transition">← Back to products</a>
             <div class="flex items-center gap-2">
-                <button type="button" @click="submit('draft')" :disabled="isSubmitting"
+                <button type="button" @click="submit('draft')" :disabled="isSubmitting || isLoadingProduct"
                     class="inline-flex h-10 items-center justify-center rounded-md border border-[#d5d9d9] bg-white px-5 text-[13px] font-bold text-[#565959] transition hover:bg-[#f0f2f2] disabled:opacity-50">
                     <template x-if="isSubmitting"><i data-lucide="loader-2" class="mr-2 h-4 w-4 animate-spin"></i></template>
-                    Save as Draft
+                    <span x-text="editId ? 'Update as Draft' : 'Save as Draft'"></span>
                 </button>
-                <button type="button" @click="submit('publish')" :disabled="isSubmitting"
+                <button type="button" @click="submit('publish')" :disabled="isSubmitting || isLoadingProduct"
                     class="inline-flex h-10 items-center justify-center rounded-md border border-[#fcd200] bg-[#ffd814] px-6 text-[13px] font-medium text-[#0f1111] shadow-[inset_0_-1px_0_rgba(0,0,0,0.15)] transition hover:bg-[#f7ca00] disabled:opacity-50">
                     <template x-if="isSubmitting"><i data-lucide="loader-2" class="mr-2 h-4 w-4 animate-spin"></i></template>
-                    Save &amp; Publish
+                    <span x-text="editId ? 'Update & Publish' : 'Save & Publish'"></span>
                 </button>
             </div>
         </div>
@@ -503,9 +538,33 @@
 
 @push('scripts')
 <script>
-function addProductApp(token) {
+const SYSTEM_SPEC_LABELS = new Set([
+    'Unit', 'Minimum Order Quantity', 'Barcode', 'Tags', 'Tax Class',
+    'Low Stock Alert', 'Product Type', 'Condition', 'Warranty',
+    'Shipping Notes', 'SEO Title', 'SEO Description', 'SEO Keywords'
+]);
+
+function defaultProductForm() {
+    return {
+        productName: '', category: 'Select Category', categoryId: '',
+        mainCategoryId: '', subCategoryId: '', subSubCategoryId: '',
+        brand: '', unit: '',
+        minimumOrderQuantity: '1', barcode: '', tags: '', slug: '',
+        isDigitalProduct: false, currencyCode: 'UGX', taxClass: 'Standard',
+        lowStockThreshold: '5', shortDescription: '', description: '',
+        shippingWeight: '', shippingLength: '', shippingWidth: '', shippingHeight: '',
+        shippingClass: 'Standard Parcel', dispatchTime: '1-2 business days',
+        shippingNotes: '', productType: 'Physical', condition: 'New',
+        visibility: 'Published', warranty: '7 days', featured: false,
+        returnable: true, seoTitle: '', seoDescription: '', seoKeywords: '',
+    };
+}
+
+function addProductApp(token, categories = [], editId = null) {
     return {
         token,
+        editId,
+        categories,
         activeTab: 0,
         tabs: [
             'Product Information',
@@ -516,17 +575,7 @@ function addProductApp(token) {
             'Others',
             'SEO',
         ],
-        form: {
-            productName: '', category: 'Select Category', brand: '', unit: '',
-            minimumOrderQuantity: '1', barcode: '', tags: '', slug: '',
-            isDigitalProduct: false, currencyCode: 'UGX', taxClass: 'Standard',
-            lowStockThreshold: '5', shortDescription: '', description: '',
-            shippingWeight: '', shippingLength: '', shippingWidth: '', shippingHeight: '',
-            shippingClass: 'Standard Parcel', dispatchTime: '1-2 business days',
-            shippingNotes: '', productType: 'Physical', condition: 'New',
-            visibility: 'Published', warranty: '7 days', featured: false,
-            returnable: true, seoTitle: '', seoDescription: '', seoKeywords: '',
-        },
+        form: defaultProductForm(),
         media: [],
         newMediaUrl: '',
         isDragging: false,
@@ -535,11 +584,154 @@ function addProductApp(token) {
         specs: [],
         bullets: ['', '', ''],
         isSubmitting: false,
+        isLoadingProduct: false,
         message: '',
         messageTone: 'success',
 
         init() {
+            if (this.editId) this.loadProduct();
             this.$nextTick(() => { if (typeof lucide !== 'undefined') lucide.createIcons(); });
+        },
+
+        get mainCategories() {
+            return this.childrenOf('');
+        },
+
+        get subCategories() {
+            return this.childrenOf(this.form.mainCategoryId);
+        },
+
+        get subSubCategories() {
+            return this.childrenOf(this.form.subCategoryId);
+        },
+
+        get selectedCategory() {
+            return this.categories.find(category => category.id === this.form.categoryId) || null;
+        },
+
+        get selectedCategoryName() {
+            return this.selectedCategory?.name || '';
+        },
+
+        get selectedCategoryPath() {
+            const names = [];
+            const main = this.categories.find(category => category.id === this.form.mainCategoryId);
+            const sub = this.categories.find(category => category.id === this.form.subCategoryId);
+            const subSub = this.categories.find(category => category.id === this.form.subSubCategoryId);
+            if (main) names.push(main.name);
+            if (sub) names.push(sub.name);
+            if (subSub) names.push(subSub.name);
+            return names.join(' / ');
+        },
+
+        childrenOf(parentId) {
+            const normalizedParentId = parentId || null;
+            return this.categories
+                .filter(category => (category.parentId || null) === normalizedParentId)
+                .sort((a, b) => (a.order || 0) - (b.order || 0) || a.name.localeCompare(b.name));
+        },
+
+        selectMainCategory() {
+            this.form.subCategoryId = '';
+            this.form.subSubCategoryId = '';
+            this.setSelectedCategory(this.form.mainCategoryId);
+        },
+
+        selectSubCategory() {
+            this.form.subSubCategoryId = '';
+            this.setSelectedCategory(this.form.subCategoryId || this.form.mainCategoryId);
+        },
+
+        selectSubSubCategory() {
+            this.setSelectedCategory(this.form.subSubCategoryId || this.form.subCategoryId || this.form.mainCategoryId);
+        },
+
+        setSelectedCategory(categoryId) {
+            const category = this.categories.find(item => item.id === categoryId);
+            this.form.categoryId = category?.id || '';
+            this.form.category = category?.name || 'Select Category';
+        },
+
+        setCategorySelection(categoryId) {
+            const chain = [];
+            let current = this.categories.find(category => category.id === categoryId);
+            while (current) {
+                chain.unshift(current);
+                current = this.categories.find(category => category.id === current.parentId);
+            }
+
+            this.form.mainCategoryId = chain[0]?.id || '';
+            this.form.subCategoryId = chain[1]?.id || '';
+            this.form.subSubCategoryId = chain[2]?.id || '';
+            this.setSelectedCategory(categoryId || '');
+        },
+
+        async loadProduct() {
+            this.isLoadingProduct = true;
+            this.message = '';
+
+            try {
+                const response = await fetch(window.API_BASE + '/api/admin/products/' + this.editId, {
+                    headers: { 'Accept': 'application/json', 'Authorization': 'Bearer ' + this.token },
+                });
+                const text = await response.text();
+                let payload = {};
+                try { payload = JSON.parse(text); } catch { payload = { error: text }; }
+                if (!response.ok || !payload.product) throw new Error(payload.error || 'Failed to load product.');
+
+                this.applyProduct(payload.product);
+            } catch (err) {
+                this.messageTone = 'error';
+                this.message = err.message || 'Failed to load product.';
+            } finally {
+                this.isLoadingProduct = false;
+                this.$nextTick(() => { if (typeof lucide !== 'undefined') lucide.createIcons(); });
+            }
+        },
+
+        applyProduct(product) {
+            const specsByLabel = new Map((product.specs || []).map(spec => [spec.label, spec.value]));
+            const shippingParts = (product.shippingLabel || '').split('|').map(part => part.trim());
+            const weightMatch = (shippingParts[1] || '').match(/([\d.]+)/);
+
+            this.form = {
+                ...defaultProductForm(),
+                productName: product.name || '',
+                slug: product.slug || '',
+                category: product.category || 'Select Category',
+                categoryId: product.categoryId || '',
+                brand: product.brand && product.brand !== 'Select Brand' ? product.brand : '',
+                currencyCode: product.currencyCode || 'UGX',
+                shortDescription: product.shortDescription || '',
+                description: product.description || '',
+                featured: Boolean(product.featured),
+                visibility: product.isPublished ? 'Published' : 'Draft',
+                unit: specsByLabel.get('Unit') || '',
+                minimumOrderQuantity: specsByLabel.get('Minimum Order Quantity') || '1',
+                barcode: specsByLabel.get('Barcode') || '',
+                tags: specsByLabel.get('Tags') || '',
+                taxClass: specsByLabel.get('Tax Class') || 'Standard',
+                lowStockThreshold: specsByLabel.get('Low Stock Alert') || '5',
+                productType: specsByLabel.get('Product Type') || 'Physical',
+                condition: specsByLabel.get('Condition') || 'New',
+                warranty: specsByLabel.get('Warranty') || '7 days',
+                shippingNotes: specsByLabel.get('Shipping Notes') || '',
+                seoTitle: specsByLabel.get('SEO Title') || '',
+                seoDescription: specsByLabel.get('SEO Description') || '',
+                seoKeywords: specsByLabel.get('SEO Keywords') || '',
+                returnable: !String(product.returnsLabel || '').toLowerCase().includes('not returnable'),
+                shippingClass: shippingParts[0] || 'Standard Parcel',
+                shippingWeight: weightMatch?.[1] || '',
+                dispatchTime: product.deliveryLabel || '1-2 business days',
+            };
+
+            this.setCategorySelection(product.categoryId || '');
+            this.media = (product.media || []).map(item => ({ ...item, uploading: false }));
+            this.variants = product.variants?.length
+                ? product.variants
+                : [{ id: crypto.randomUUID(), label: 'Default', sku: '', price: '', compareAtPrice: '', stockQty: '' }];
+            this.specs = (product.specs || []).filter(spec => !SYSTEM_SPEC_LABELS.has(spec.label));
+            this.bullets = product.bullets?.length ? product.bullets : ['', '', ''];
         },
 
         async handleFileSelect(files) {
@@ -626,7 +818,7 @@ function addProductApp(token) {
 
         async submit(action) {
             if (!this.form.productName.trim()) { alert('Product name is required.'); return; }
-            if (this.form.category === 'Select Category') { alert('Please select a category.'); return; }
+            if (!this.form.categoryId) { alert('Please select a category.'); return; }
             if (this.variants.some(v => !v.price.trim())) { this.activeTab = 2; alert('Every variant needs a price.'); return; }
             if (this.uploadingCount > 0) { this.activeTab = 1; alert('Please wait for all uploads to finish.'); return; }
 
@@ -634,13 +826,17 @@ function addProductApp(token) {
             this.message = '';
 
             try {
-                const response = await fetch(window.API_BASE + '/api/admin/products', {
-                    method: 'POST',
+                const endpoint = this.editId
+                    ? window.API_BASE + '/api/admin/products/' + this.editId
+                    : window.API_BASE + '/api/admin/products';
+                const response = await fetch(endpoint, {
+                    method: this.editId ? 'PATCH' : 'POST',
                     headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + this.token },
                     body: JSON.stringify({
                         action,
                         name: this.form.productName,
                         slug: this.form.slug || this.slugify(this.form.productName),
+                        categoryId: this.form.categoryId,
                         categoryName: this.form.category,
                         brand: this.form.brand,
                         currencyCode: this.form.currencyCode,
@@ -668,24 +864,18 @@ function addProductApp(token) {
                 if (!response.ok) throw new Error(payload.error || 'Failed to save product.');
 
                 this.messageTone = 'success';
-                this.message = action === 'publish' ? 'Product published successfully.' : 'Product saved as draft.';
+                this.message = this.editId
+                    ? (action === 'publish' ? 'Product updated and published successfully.' : 'Product updated as draft.')
+                    : (action === 'publish' ? 'Product published successfully.' : 'Product saved as draft.');
 
-                this.form = {
-                    productName: '', category: 'Select Category', brand: '', unit: '',
-                    minimumOrderQuantity: '1', barcode: '', tags: '', slug: '',
-                    isDigitalProduct: false, currencyCode: 'UGX', taxClass: 'Standard',
-                    lowStockThreshold: '5', shortDescription: '', description: '',
-                    shippingWeight: '', shippingLength: '', shippingWidth: '', shippingHeight: '',
-                    shippingClass: 'Standard Parcel', dispatchTime: '1-2 business days',
-                    shippingNotes: '', productType: 'Physical', condition: 'New',
-                    visibility: 'Published', warranty: '7 days', featured: false,
-                    returnable: true, seoTitle: '', seoDescription: '', seoKeywords: '',
-                };
-                this.media = [];
-                this.variants = [{ id: crypto.randomUUID(), label: 'Default', sku: '', price: '', compareAtPrice: '', stockQty: '' }];
-                this.specs = [];
-                this.bullets = ['', '', ''];
-                this.activeTab = 0;
+                if (!this.editId) {
+                    this.form = defaultProductForm();
+                    this.media = [];
+                    this.variants = [{ id: crypto.randomUUID(), label: 'Default', sku: '', price: '', compareAtPrice: '', stockQty: '' }];
+                    this.specs = [];
+                    this.bullets = ['', '', ''];
+                    this.activeTab = 0;
+                }
 
             } catch (err) {
                 this.messageTone = 'error';
