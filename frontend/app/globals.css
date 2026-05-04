@@ -1,6 +1,4 @@
 @import "tailwindcss";
-@import "quill/dist/quill.snow.css";
-
 @font-face {
   font-family: "Amazon Ember";
   src: url("/fonts/AmazonEmber_Rg.ttf") format("truetype");
