@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { Loader2, Lock, Mail, Phone, User, X } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -32,15 +32,8 @@ export default function AuthOverlay() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
 
-  const canSubmitLogin = useMemo(
-    () => (phone.trim().length > 0 || email.trim().length > 0) && password.length > 0,
-    [email, password, phone]
-  );
-
-  const canSubmitSignup = useMemo(
-    () => fullName.trim().length > 0 && phone.trim().length > 0 && password.length > 0 && confirmPassword.length > 0,
-    [fullName, email, phone, password, confirmPassword]
-  );
+  const canSubmitLogin = (phone.trim().length > 0 || email.trim().length > 0) && password.length >= 8;
+  const canSubmitSignup = fullName.trim().length > 0 && phone.trim().length > 0 && password.length >= 8 && confirmPassword.length > 0;
 
   const resetState = useCallback(() => {
     setPassword("");
@@ -98,7 +91,11 @@ export default function AuthOverlay() {
     return () => window.removeEventListener("keydown", handleEscape);
   }, [closeModal, isOpen]);
 
+  const loginRef = useRef(false);
   async function submitLogin() {
+    if (loginRef.current) return;
+    if (password.length < 8) { setError("Password must be at least 8 characters."); return; }
+    loginRef.current = true;
     setBusy(true);
     setError("");
     try {
@@ -110,13 +107,14 @@ export default function AuthOverlay() {
       setError("Failed to sign in.");
     } finally {
       setBusy(false);
+      loginRef.current = false;
     }
   }
 
   async function submitSignup() {
     if (!fullName.trim()) { setError("Full name is required."); return; }
     if (!phone.trim()) { setError("Phone number is required."); return; }
-    if (password.length < 6) { setError("Password must be at least 6 characters."); return; }
+    if (password.length < 8) { setError("Password must be at least 8 characters."); return; }
     if (password !== confirmPassword) { setError("Passwords do not match."); return; }
 
     setBusy(true);
@@ -136,7 +134,7 @@ export default function AuthOverlay() {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[2000] flex items-center justify-center bg-black/55 px-4 backdrop-blur-[2px]">
+      <div className="fixed inset-0 z-[2000] flex items-center justify-center bg-black/60 px-4">
       <button type="button" aria-label="Close" onClick={closeModal} className="absolute inset-0" />
 
       <div className="relative w-full max-w-[440px] rounded-[20px] border border-[#d5d9d9] bg-white shadow-[0_18px_40px_rgba(15,17,17,0.28)]">
@@ -182,8 +180,8 @@ export default function AuthOverlay() {
                 Sign in with your email or phone and password.
               </p>
               <Field label="Email" value={email} onChange={setEmail} placeholder="you@example.com" icon={<Mail size={18} className="text-[#565959]" />} type="email" />
-              <Field label="Phone number" value={phone} onChange={setPhone} placeholder="+256..." icon={<Phone size={18} className="text-[#565959]" />} />
-              <Field label="Password" value={password} onChange={setPassword} placeholder="Your password" icon={<Lock size={18} className="text-[#565959]" />} type="password" />
+              <Field label="Phone number" value={phone} onChange={v => setPhone(v.replace(/[^\d+]/g, ""))} placeholder="+256..." icon={<Phone size={18} className="text-[#565959]" />} type="tel" />
+              <Field label="Password" value={password} onChange={setPassword} placeholder="Min. 8 characters"
 
               {error ? <p className="text-[13px] text-[#b12704]">{error}</p> : null}
 
@@ -211,8 +209,8 @@ export default function AuthOverlay() {
               </p>
               <Field label="Full name" value={fullName} onChange={setFullName} placeholder="John Doe" icon={<User size={18} className="text-[#565959]" />} />
               <Field label="Email (optional)" value={email} onChange={setEmail} placeholder="you@example.com" icon={<Mail size={18} className="text-[#565959]" />} type="email" />
-              <Field label="Phone number" value={phone} onChange={setPhone} placeholder="+256..." icon={<Phone size={18} className="text-[#565959]" />} />
-              <Field label="Password" value={password} onChange={setPassword} placeholder="At least 6 characters" icon={<Lock size={18} className="text-[#565959]" />} type="password" />
+              <Field label="Phone number" value={phone} onChange={v => setPhone(v.replace(/[^\d+]/g, ""))} placeholder="+256..." icon={<Phone size={18} className="text-[#565959]" />} type="tel" />
+              <Field label="Password" value={password} onChange={setPassword} placeholder="Min. 8 characters"
               <Field label="Confirm password" value={confirmPassword} onChange={setConfirmPassword} placeholder="Repeat your password" icon={<Lock size={18} className="text-[#565959]" />} type="password" />
 
               {error ? <p className="text-[13px] text-[#b12704]">{error}</p> : null}

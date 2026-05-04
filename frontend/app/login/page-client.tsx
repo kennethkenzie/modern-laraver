@@ -2,7 +2,7 @@
 
 import { Loader2, Lock, Mail, Phone, User } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { login, signup } from "@/lib/auth";
 
 export default function LoginPageClient() {
@@ -31,24 +31,29 @@ export default function LoginPageClient() {
     setSuccess("");
   }
 
+  const loginRef = useRef(false);
   async function submitLogin() {
+    if (loginRef.current) return;
+    if (password.length < 8) { setError("Password must be at least 8 characters."); return; }
+    loginRef.current = true;
     setBusy(true);
     setError("");
     try {
       const result = await login(email.trim() || phone, password);
-      if (!result.ok) { setError(result.error); return; }
+      if (!result.ok) { setError(result.error); loginRef.current = false; return; }
       router.push(redirect);
     } catch {
       setError("Failed to sign in.");
     } finally {
       setBusy(false);
+      loginRef.current = false;
     }
   }
 
   async function submitSignup() {
     if (!fullName.trim()) { setError("Full name is required."); return; }
     if (!phone.trim()) { setError("Phone number is required."); return; }
-    if (password.length < 6) { setError("Password must be at least 6 characters."); return; }
+    if (password.length < 8) { setError("Password must be at least 8 characters."); return; }
     if (password !== confirmPassword) { setError("Passwords do not match."); return; }
 
     setBusy(true);
@@ -108,14 +113,14 @@ export default function LoginPageClient() {
                 </p>
                 <div className="space-y-4">
                   <Field label="Email" value={email} onChange={setEmail} placeholder="you@example.com" icon={<Mail size={18} className="text-[#565959]" />} type="email" />
-                  <Field label="Phone number" value={phone} onChange={setPhone} placeholder="+256..." icon={<Phone size={18} className="text-[#565959]" />} />
-                  <Field label="Password" value={password} onChange={setPassword} placeholder="Your password" icon={<Lock size={18} className="text-[#565959]" />} type="password" />
+                  <Field label="Phone number" value={phone} onChange={v => setPhone(v.replace(/[^\d+]/g, ""))} placeholder="+256..." icon={<Phone size={18} className="text-[#565959]" />} type="tel" />
+                  <Field label="Password" value={password} onChange={setPassword} placeholder="Min. 8 characters"
 
                   {error ? <p className="text-[13px] text-[#b12704]">{error}</p> : null}
 
                   <button
                     type="button"
-                    disabled={busy || (!phone.trim() && !email.trim()) || !password}
+                  disabled={busy || (!phone.trim() && !email.trim()) || password.length < 8}
                     onClick={() => void submitLogin()}
                     className="flex w-full items-center justify-center gap-2 rounded-full border border-[#fcd200] bg-[#ffd814] px-4 py-3 text-[14px] font-medium text-[#0f1111] shadow-[inset_0_-1px_0_rgba(0,0,0,0.15)] hover:bg-[#f7ca00] disabled:opacity-60"
                   >
@@ -139,8 +144,8 @@ export default function LoginPageClient() {
                 <div className="space-y-4">
                   <Field label="Full name" value={fullName} onChange={setFullName} placeholder="John Doe" icon={<User size={18} className="text-[#565959]" />} />
                   <Field label="Email (optional)" value={email} onChange={setEmail} placeholder="you@example.com" icon={<Mail size={18} className="text-[#565959]" />} type="email" />
-                  <Field label="Phone number" value={phone} onChange={setPhone} placeholder="+256..." icon={<Phone size={18} className="text-[#565959]" />} />
-                  <Field label="Password" value={password} onChange={setPassword} placeholder="At least 6 characters" icon={<Lock size={18} className="text-[#565959]" />} type="password" />
+                  <Field label="Phone number" value={phone} onChange={v => setPhone(v.replace(/[^\d+]/g, ""))} placeholder="+256..." icon={<Phone size={18} className="text-[#565959]" />} type="tel" />
+                  <Field label="Password" value={password} onChange={setPassword} placeholder="Min. 8 characters"
                   <Field label="Confirm password" value={confirmPassword} onChange={setConfirmPassword} placeholder="Repeat your password" icon={<Lock size={18} className="text-[#565959]" />} type="password" />
 
                   {error ? <p className="text-[13px] text-[#b12704]">{error}</p> : null}
@@ -148,7 +153,7 @@ export default function LoginPageClient() {
 
                   <button
                     type="button"
-                    disabled={busy || !fullName.trim() || !phone.trim() || !password || !confirmPassword}
+                  disabled={busy || !fullName.trim() || !phone.trim() || password.length < 8 || !confirmPassword}
                     onClick={() => void submitSignup()}
                     className="flex w-full items-center justify-center gap-2 rounded-full border border-[#fcd200] bg-[#ffd814] px-4 py-3 text-[14px] font-medium text-[#0f1111] shadow-[inset_0_-1px_0_rgba(0,0,0,0.15)] hover:bg-[#f7ca00] disabled:opacity-60"
                   >
