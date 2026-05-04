@@ -153,9 +153,9 @@ export type Category = {
   commission: string;
   isFeatured: boolean;
   isActive: boolean;
-  thumbnail: string; // Cloudinary URL
-  banner: string; // Cloudinary URL
-  icon: string; // Cloudinary URL
+  thumbnail: string;
+  banner: string;
+  icon: string;
   slug: string;
 };
 
@@ -163,8 +163,8 @@ export type Brand = {
   id: string;
   title: string;
   slug: string;
-  logo: string; // Cloudinary URL
-  banner?: string; // Cloudinary URL
+  logo: string;
+  banner?: string;
   metaTitle?: string;
   metaDescription?: string;
   isActive: boolean;
@@ -175,7 +175,7 @@ export type PaymentGateway = {
   id: string;
   name: string;
   description: string;
-  logo: string; // Cloudinary URL
+  logo: string;
   enabled: boolean;
 };
 
@@ -246,10 +246,10 @@ export const defaultFrontendData: FrontendData = {
       { label: "Contact", href: "/contact", icon: "mail" },
     ],
     quickLinks: [
-      { label: "TV Parts", href: "/tv-parts" },
-      { label: "Featured Category", href: "/featured" },
-      { label: "Hot Deals!", href: "/wholesale" },
-      { label: "Blog", href: "/blog" },
+      { label: "TV Parts", href: "/category/spare-parts" },
+      { label: "Home Appliances", href: "/category/home-appliances" },
+      { label: "Accessories", href: "/category/accessories" },
+      { label: "Contact Us", href: "/contact" },
     ],
   },
   hero: {
@@ -270,13 +270,13 @@ export const defaultFrontendData: FrontendData = {
         // live Spare Parts category (see CategoryTilesSection + getSparePartsCategoryFeature).
         title: "Spare parts and Components",
         tiles: [],
-        cta: { label: "Shop TV parts", href: "/tv-parts" },
+        cta: { label: "Shop TV parts", href: "/category/spare-parts" },
       },
       {
         // Mockup tiles removed — populated from live data at runtime.
         title: "Repair tools & workshop essentials",
         tiles: [],
-        cta: { label: "Explore repair tools", href: "/tools" },
+        cta: { label: "Explore repair tools", href: "/category/spare-parts" },
       },
       {
         // Mockup tiles removed — populated from live data at runtime.
@@ -288,14 +288,14 @@ export const defaultFrontendData: FrontendData = {
         // Mockup tiles removed — populated from live data at runtime.
         title: "Popular accessories for installers",
         tiles: [],
-        cta: { label: "Explore accessories", href: "/accessories" },
+        cta: { label: "Explore accessories", href: "/category/accessories" },
       },
     ],
   },
   latestProducts: {
     title: "Latest",
     ctaLabel: "View all",
-    ctaHref: "/products",
+    ctaHref: "/category/all",
     products: [],
   },
   relatedProducts: {
