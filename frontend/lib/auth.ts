@@ -101,6 +101,25 @@ async function apiPost<T>(path: string, body: unknown, token?: string): Promise<
 
 // ─── public auth functions ────────────────────────────────────
 
+export async function signup(fullName: string, emailOrPhone: string, password: string) {
+  const value = emailOrPhone.trim();
+  const isEmail = value.includes("@");
+  const payload = isEmail
+    ? { name: fullName, email: value.toLowerCase(), password, password_confirmation: password }
+    : { name: fullName, phone: normalizePhoneNumber(value) || value, password, password_confirmation: password };
+
+  const data = await apiPost<AuthResponse>("/register", payload);
+
+  if (data.error || !data.ok) {
+    return { ok: false as const, error: data.error ?? "Registration failed." };
+  }
+
+  setToken(data.token!, false);
+  const profile = normalizeProfile(data.profile);
+  setSession(profile);
+  return { ok: true as const, user: profile };
+}
+
 export async function login(emailOrPhone: string, password: string) {
   const value = emailOrPhone.trim();
   // Use email field when the value looks like an email, otherwise phone
