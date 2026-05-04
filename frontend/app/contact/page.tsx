@@ -1,7 +1,7 @@
 import NavBar from "@/components/NavBar";
 import Footer from "@/components/Footer";
 import ContactClient from "./ContactClient";
-import { readFrontendDataFromPrisma } from "@/lib/site-settings";
+import { readFrontendDataFromPrisma as readFrontendData } from "@/lib/site-settings";
 import { mergeFrontendData } from "@/lib/frontend-data-merge";
 import { API_URL } from "@/lib/api";
 import type { Metadata } from "next";
@@ -36,7 +36,7 @@ const defaults: ContactPageData = {
 async function getContactPageData(): Promise<ContactPageData> {
   try {
     const res = await fetch(`${API_URL}/pages/contact`, {
-      cache: "no-store",
+      next: { revalidate: 300 },
     });
     if (!res.ok) return defaults;
     const json = (await res.json()) as { data?: Partial<ContactPageData> };
@@ -48,7 +48,7 @@ async function getContactPageData(): Promise<ContactPageData> {
 
 export default async function ContactPage() {
   const [frontendData, contactData] = await Promise.all([
-    readFrontendDataFromPrisma().then((d) => d ?? mergeFrontendData({})),
+    readFrontendData().then((d) => d ?? mergeFrontendData({})),
     getContactPageData(),
   ]);
 

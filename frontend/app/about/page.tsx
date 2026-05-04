@@ -1,7 +1,7 @@
 import NavBar from "@/components/NavBar";
 import Footer from "@/components/Footer";
 import AboutClient from "./AboutClient";
-import { readFrontendDataFromPrisma } from "@/lib/site-settings";
+import { readFrontendDataFromPrisma as readFrontendData } from "@/lib/site-settings";
 import { mergeFrontendData } from "@/lib/frontend-data-merge";
 import { API_URL } from "@/lib/api";
 import type { Metadata } from "next";
@@ -46,7 +46,7 @@ const defaults: AboutData = {
 
 async function getAboutData(): Promise<AboutData> {
   try {
-    const res = await fetch(`${API_URL}/pages/about`, { cache: "no-store" });
+    const res = await fetch(`${API_URL}/pages/about`, { next: { revalidate: 300 } });
     if (!res.ok) return defaults;
     const json = (await res.json()) as { data?: Partial<AboutData> };
     return { ...defaults, ...(json.data ?? {}) };
@@ -57,7 +57,7 @@ async function getAboutData(): Promise<AboutData> {
 
 export default async function AboutPage() {
   const [frontendData, aboutData] = await Promise.all([
-    readFrontendDataFromPrisma().then((d) => d ?? mergeFrontendData({})),
+    readFrontendData().then((d) => d ?? mergeFrontendData({})),
     getAboutData(),
   ]);
 

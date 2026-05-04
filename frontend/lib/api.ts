@@ -33,7 +33,7 @@ export async function apiFetch<T = unknown>(
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...headers,
     },
-    cache: "no-store",
+    ...(body === undefined ? { next: { revalidate: 300 } } : { cache: "no-store" }),
   };
 
   if (body !== undefined) {
